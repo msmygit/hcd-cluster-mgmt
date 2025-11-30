@@ -1,0 +1,30 @@
+---
+- name: Install Cassandra Reaper
+  hosts: hcd_nodes[0]  # Install on first node only
+  become: yes
+  gather_facts: yes
+  roles:
+    - role: reaper
+      tags: ['reaper', 'repairs']
+
+  post_tasks:
+    - name: Wait for Reaper to be ready
+      uri:
+        url: "http://{{ private_ip }}:{{ reaper_port }}/ping"
+        method: GET
+        status_code: 200
+      register: reaper_health
+      retries: 30
+      delay: 10
+      until: reaper_health.status == 200
+
+    - name: Display Reaper access information
+      debug:
+        msg:
+          - "Cassandra Reaper successfully installed"
+          - "Web UI: http://{{ inventory_hostname }}:{{ reaper_port }}/webui"
+          - "API: http://{{ inventory_hostname }}:{{ reaper_port }}"
+          - "Admin port: {{ reaper_admin_port }}"
+          - ""
+          - "To register the cluster, use:"
+          - "curl -X POST http://{{ inventory_hostname }}:{{ reaper_port }}/cluster -H 'Content-Type: application/json' -d '{\"seedHost\":\"{{ groups['hcd_nodes'][0] }}\"}'"

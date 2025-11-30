@@ -1,0 +1,22 @@
+---
+# Debian/Ubuntu specific Java installation
+
+- name: Install OpenJDK {{ java_version }} (Debian/Ubuntu)
+  apt:
+    name: "{{ java_package_debian }}"
+    state: present
+    update_cache: yes
+
+# - name: Set Java {{ java_version }} as default using update-alternatives
+#   alternatives:
+#     name: java
+#     path: "{{ java_home_debian }}/bin/java"
+#     link: /usr/bin/java
+#     priority: 1
+
+# - name: Set JAVA_HOME environment variable
+#   lineinfile:
+#     path: /etc/environment
+#     regexp: '^JAVA_HOME='
+#     line: 'JAVA_HOME={{ java_home_debian }}'
+#     create: yes

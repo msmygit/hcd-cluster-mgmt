@@ -1,0 +1,20 @@
+---
+# Create directory structure for HCD
+
+- name: Create HCD installation directory
+  file:
+    path: "{{ hcd_install_dir }}"
+    state: directory
+    owner: "{{ cassandra_user }}"
+    group: "{{ cassandra_group }}"
+    mode: '0755'
+
+- name: Create Cassandra data directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ cassandra_user }}"
+    group: "{{ cassandra_group }}"
+    mode: '0755'
+    recurse: yes
+  loop: "{{ data_directories }}"

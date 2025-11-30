@@ -1,0 +1,223 @@
+---
+# Configure cassandra.yaml using regex replacements
+# - name: Debug info
+#   debug:
+#     var: hcd_cluster_name
+
+- name: Set cluster name
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^cluster_name:\s*.*'
+    line: "cluster_name: '{{ hcd_cluster_name }}'"
+    backup: yes
+
+- name: Set num_tokens
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^num_tokens:\s*\d+'
+    line: "num_tokens: {{ num_tokens }}"
+
+- name: Set allocate_tokens_for_local_replication_factor
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?allocate_tokens_for_local_replication_factor:\s*\d+'
+    line: "allocate_tokens_for_local_replication_factor: {{ allocate_tokens_for_local_replication_factor }}"
+
+- name: Build seed nodes list
+  set_fact:
+    seed_nodes_string: "DOES NOT WORK"
+    #seed_nodes_string: "{{ groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', true) | map(attribute='private_ip') | list | join(',') }}"
+    # only hosts with 'seed' defined
+    # convert string 'true'/'false' to boolean
+    # selectattr('seed', 'bool') |
+    # does not work and gives '\\g<1>:7000'
+    # seed_nodes_string: >-
+    #   {{
+    #     groups['hcd_nodes'] |
+    #     map('extract', hostvars) |
+    #     selectattr('seed', 'defined') |
+    #     selectattr('seed', 'equalto', 'true') |
+    #     map(attribute='private_ip') |
+    #     map('regex_replace', '^(.*)$', '\\g<1>:' ~ storage_port|string) |
+    #     list | join(',')
+    #   }}
+    # does not work and gives 'Syntax error in template: expected token ',', got 'for'"}'
+    # seed_nodes_string: >-
+    #  {{
+    #     ','.join([
+    #         hostvars[h]['private_ip'] ~ ':' ~ storage_port
+    #         for h in groups['hcd_nodes']
+    #         if hostvars[h].get('seed') == 'true'
+    #     ])
+    #   }}
+
+- name: debug constructured seed list
+  debug:
+    msg: "seed_nodes_list -> {{ seed_nodes_list }} and seed_nodes_string -> {{ seed_nodes_string }}"
+
+- name: Set seed nodes
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    #regexp: '^\s+- seeds:\s*".*"'
+    regexp: '^\s{10}- seeds:\s*".*"'
+    #line: '          - seeds: "{{ seed_nodes_string }}"'
+    line: '          - seeds: "{{ seed_nodes_list }}"'
+
+
+- name: Set listen_address to private IP
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?listen_address:\s*.*'
+    line: "listen_address: {{ private_ip }}"
+
+- name: Uncomment and set broadcast_address to public IP
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*broadcast_address:\s*.*'
+    line: "broadcast_address: {{ inventory_hostname }}"
+
+- name: Set rpc_address to private IP
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?rpc_address:\s*.*'
+    line: "rpc_address: {{ private_ip }}"
+
+- name: Uncomment and set broadcast_rpc_address to public IP
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*broadcast_rpc_address:\s*.*'
+    line: "broadcast_rpc_address: {{ inventory_hostname }}"
+
+- name: Set endpoint_snitch
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^endpoint_snitch:\s*.*'
+    line: "endpoint_snitch: {{ endpoint_snitch }}"
+
+- name: Set concurrent_reads
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?concurrent_reads:\s*.*'
+    line: "concurrent_reads: {{ concurrent_reads }}"
+
+- name: Set concurrent_writes
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?concurrent_writes:\s*.*'
+    line: "concurrent_writes: {{ concurrent_writes }}"
+
+- name: Uncomment and set concurrent_compactors based on CPU cores
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*concurrent_compactors:\s*.*'
+    line: "concurrent_compactors: {{ concurrent_compactors }}"
+
+- name: Set compaction_throughput_mb_per_sec
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?compaction_throughput_mb_per_sec:\s*.*'
+    line: "compaction_throughput_mb_per_sec: {{ compaction_throughput_mb_per_sec }}"
+
+- name: Uncomment metadata_directory
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*metadata_directory:\s*.*'
+    line: "metadata_directory: {{ metadata_directory }}"
+
+- name: Uncomment data_file_directories
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*data_file_directories:'
+    line: "data_file_directories:"
+
+- name: Set data_file_directories path
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*-\s*/var/lib/cassandra/data'
+    line: "     - {{ data_file_directories[0] }}"
+
+- name: Uncomment commitlog_directory
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*commitlog_directory:\s*.*'
+    line: "commitlog_directory: {{ commitlog_directory }}"
+
+- name: Uncomment cdc_raw_directory
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*cdc_raw_directory:\s*.*'
+    line: "cdc_raw_directory: {{ cdc_raw_directory }}"
+
+- name: Uncomment saved_caches_directory
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*saved_caches_directory:\s*.*'
+    line: "saved_caches_directory: {{ saved_caches_directory }}"
+
+- name: Uncomment hints_directory
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?\s*hints_directory:\s*.*'
+    line: "hints_directory: {{ hints_directory }}"
+
+- name: Set authenticator
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    #regexp: '^authenticator:\s*.*'
+    regexp: '^# authenticator: AllowAllAuthenticator$'
+    line: "authenticator: {{ authenticator }}"
+
+- name: Enable 'enabled' in AdvancedAuthenticator section only
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    #regexp: '^(#\s*)enabled:\s*true'
+    regexp: '^# {5}enabled: true$'
+    line: '     enabled: true'
+    backrefs: yes
+    insertafter: '^ {2}class_name: com\.datastax\.cassandra\.auth\.AdvancedAuthenticator'
+
+- name: "Set 'default_scheme: internal' in AdvancedAuthenticator section only"
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^# {5}default_scheme: internal$'
+    line: '     default_scheme: internal'
+    backrefs: yes
+    insertafter: '^ {2}class_name: com\.datastax\.cassandra\.auth\.AdvancedAuthenticator$'
+
+- name: "Set 'plain_text_without_ssl: warn' in AdvancedAuthenticator section only"
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^# {5}plain_text_without_ssl: warn$'
+    line: '     plain_text_without_ssl: warn'
+    backrefs: yes
+    insertafter: '^ {2}class_name: com\.datastax\.cassandra\.auth\.AdvancedAuthenticator$'
+
+- name: Set authorizer
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    #regexp: '^authorizer:\s*.*'
+    regexp: '^# authorizer: AllowAllAuthorizer$'
+    line: "authorizer: {{ authorizer }}"
+
+- name: Enable 'enabled' in AdvancedAuthorizer section only
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    #regexp: '^(#\s*)enabled:\s*true'
+    regexp: '^# {5}enabled: true$'
+    line: '     enabled: true'
+    backrefs: yes
+    insertafter: '^ {2}class_name: com\.datastax\.cassandra\.auth\.AdvancedAuthorizer$'
+
+- name: Set role_manager
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^# role_manager: CassandraRoleManager$'
+    line: "role_manager: {{ role_manager }}"
+
+- name: "Enable 'mode: internal' in AdvancedRoleManager section only"
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^# {5}mode: internal$'
+    line: '     mode: internal'
+    backrefs: yes
+    insertafter: '^ {2}class_name: com\.datastax\.cassandra\.auth\.AdvancedRoleManager$'

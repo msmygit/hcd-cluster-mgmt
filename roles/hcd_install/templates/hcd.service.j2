@@ -1,0 +1,19 @@
+[Unit]
+Description=HyperConverged Database (HCD)
+After=network.target
+
+[Service]
+Type=forking
+User={{ cassandra_user }}
+Group={{ cassandra_group }}
+ExecStart={{ hcd_install_dir }}/bin/hcd cassandra
+ExecStop={{ hcd_install_dir }}/bin/nodetool stopdaemon
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=100000
+LimitMEMLOCK=infinity
+LimitNPROC=32768
+LimitAS=infinity
+
+[Install]
+WantedBy=multi-user.target

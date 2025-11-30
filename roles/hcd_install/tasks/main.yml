@@ -1,0 +1,26 @@
+---
+# Main tasks for hcd_install role
+
+- name: Include user creation tasks
+  include_tasks: user.yml
+
+- name: Include directory creation tasks
+  include_tasks: directories.yml
+
+- name: Include HCD installation tasks
+  include_tasks: install.yml
+
+- name: Create systemd service file
+  template:
+    src: hcd.service.j2
+    dest: /etc/systemd/system/hcd.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd
+
+- name: Ensure HCD service is enabled
+  systemd:
+    name: hcd
+    enabled: yes
+    daemon_reload: yes

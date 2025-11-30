@@ -1,0 +1,13 @@
+---
+# Handlers for Reaper role
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+  listen: "Reload systemd"
+
+- name: Restart Reaper
+  systemd:
+    name: cassandra-reaper
+    state: restarted
+  listen: "Restart Reaper"

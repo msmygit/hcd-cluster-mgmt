@@ -1,0 +1,16 @@
+# Cassandra system limits configuration
+# Managed by Ansible
+
+{{ cassandra_user }} soft nofile {{ limits_nofile_soft }}
+{{ cassandra_user }} hard nofile {{ limits_nofile_hard }}
+{{ cassandra_user }} soft nproc {{ limits_nproc_soft }}
+{{ cassandra_user }} hard nproc {{ limits_nproc_hard }}
+{{ cassandra_user }} soft memlock {{ limits_memlock_soft }}
+{{ cassandra_user }} hard memlock {{ limits_memlock_hard }}
+{{ cassandra_user }} soft as {{ limits_as_soft }}
+{{ cassandra_user }} hard as {{ limits_as_hard }}
+
+root soft nofile {{ limits_nofile_soft }}
+root hard nofile {{ limits_nofile_hard }}
+root soft nproc {{ limits_nproc_soft }}
+root hard nproc {{ limits_nproc_hard }}

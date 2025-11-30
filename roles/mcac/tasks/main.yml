@@ -1,0 +1,67 @@
+---
+# Main tasks for MCAC (Metric Collector for Apache Cassandra) installation
+
+- name: Create MCAC installation directory
+  file:
+    path: "{{ mcac_install_dir }}"
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: '0755'
+
+- name: Download MCAC agent
+  get_url:
+    url: "{{ mcac_download_url }}"
+    dest: "/tmp/mcac-agent.tar.gz"
+    mode: '0644'
+  register: mcac_download
+
+- name: Extract MCAC agent
+  unarchive:
+    src: "/tmp/mcac-agent.tar.gz"
+    dest: "{{ mcac_install_dir }}"
+    remote_src: yes
+    owner: cassandra
+    group: cassandra
+    extra_opts: [--strip-components=1]
+  when: mcac_download.changed
+
+- name: Create MCAC config directory
+  file:
+    path: "{{ mcac_config_dir }}"
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: '0755'
+
+- name: Configure MCAC metrics-collector.yaml
+  template:
+    src: metrics-collector.yaml.j2
+    dest: "{{ mcac_config_dir }}/metrics-collector.yaml"
+    owner: cassandra
+    group: cassandra
+    mode: '0644'
+  notify: Restart HCD
+
+- name: Add MCAC agent to cassandra-env.sh
+  blockinfile:
+    path: "{{ hcd_install_dir }}/resources/cassandra/conf/cassandra-env.sh"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - MCAC"
+    block: |
+      # MCAC (Metric Collector for Apache Cassandra)
+      JVM_OPTS="$JVM_OPTS -javaagent:{{ mcac_agent_jar }}=config={{ mcac_config_dir }}/metrics-collector.yaml"
+    insertafter: EOF
+  notify: Restart HCD
+
+- name: Ensure MCAC log directory exists
+  file:
+    path: "{{ mcac_log_dir }}"
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: '0755'
+
+- name: Clean up downloaded tarball
+  file:
+    path: "/tmp/mcac-agent.tar.gz"
+    state: absent

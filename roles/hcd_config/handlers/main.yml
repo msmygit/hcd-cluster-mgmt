@@ -1,0 +1,8 @@
+---
+# Handlers for hcd_config role
+
+- name: Restart HCD
+  systemd:
+    name: hcd
+    state: restarted
+  when: ansible_facts['services']['hcd.service'] is defined and ansible_facts['services']['hcd.service']['state'] == 'running'

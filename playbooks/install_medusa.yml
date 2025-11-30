@@ -1,0 +1,31 @@
+---
+- name: Install Cassandra Medusa (Backup/Restore)
+  hosts: hcd_nodes
+  serial: "100%"  # Can run in parallel
+  become: yes
+  gather_facts: yes
+  roles:
+    - role: medusa
+      tags: ['medusa', 'backup']
+
+  post_tasks:
+    - name: Verify Medusa installation
+      command: medusa --version
+      register: medusa_version
+      changed_when: false
+
+    - name: Display Medusa installation status
+      debug:
+        msg:
+          - "Medusa successfully installed on {{ inventory_hostname }}"
+          - "Version: {{ medusa_version.stdout }}"
+          - "Configuration: {{ medusa_config_file }}"
+          - ""
+          - "Common Medusa commands:"
+          - "  - Create backup: sudo -u cassandra medusa backup --backup-name=<name>"
+          - "  - List backups: sudo -u cassandra medusa list-backups"
+          - "  - Restore backup: sudo -u cassandra medusa restore --backup-name=<name>"
+          - "  - Verify backup: sudo -u cassandra medusa verify --backup-name=<name>"
+          - ""
+          - "Storage backend: {{ medusa_storage_provider }}"
+          - "Bucket/Path: {{ medusa_bucket_name }}/{{ medusa_base_path }}"

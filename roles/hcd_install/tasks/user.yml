@@ -1,0 +1,19 @@
+---
+# Create cassandra user and group
+
+- name: Create cassandra group
+  group:
+    name: "{{ cassandra_group }}"
+    #gid: "{{ cassandra_gid }}"
+    system: yes
+    state: present
+
+- name: Create cassandra user
+  user:
+    name: "{{ cassandra_user }}"
+    uid: "{{ cassandra_uid }}"
+    group: "{{ cassandra_group }}"
+    shell: /bin/false
+    system: yes
+    create_home: no
+    state: present

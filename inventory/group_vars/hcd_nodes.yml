@@ -1,0 +1,77 @@
+---
+# HCD cluster configuration
+
+# HCD Cluster identity only should be applied to hcd_nodes group
+hcd_cluster_name: "HCD_Production_Cluster"
+
+# Token allocation
+num_tokens: 16
+allocate_tokens_for_local_replication_factor: 3
+
+# Network configuration (using private and public IPs)
+listen_address: "{{ private_ip }}"                        # Private IP for internal communication
+rpc_address: "{{ private_ip }}"                           # Private IP for CQL connections
+broadcast_address: "{{ inventory_hostname }}"             # Public IP (inventory_hostname)
+broadcast_rpc_address: "{{ inventory_hostname }}"         # Public IP for client connections
+
+# Ports
+storage_port: 7000
+ssl_storage_port: 7001
+native_transport_port: 9042
+rpc_port: 9160
+
+# Snitch configuration
+endpoint_snitch: "GossipingPropertyFileSnitch"
+
+# Performance tuning (auto-calculated based on hardware)
+concurrent_reads: "{{ ansible_facts['processor_cores'] * 2 }}"
+concurrent_writes: "{{ ansible_facts['processor_cores'] * 2 }}"
+concurrent_counter_writes: "{{ ansible_facts['processor_cores'] * 2 }}"
+concurrent_compactors: "{{ ansible_facts['processor_cores'] }}"  # Set to number of CPU cores
+compaction_throughput_mb_per_sec: 64
+stream_throughput_outbound_megabits_per_sec: 400
+
+# Memory settings
+file_cache_size_in_mb: 512
+memtable_heap_space_in_mb: 2048
+memtable_offheap_space_in_mb: 2048
+
+# Commitlog settings
+commitlog_sync: "periodic"
+commitlog_sync_period_in_ms: 10000
+commitlog_segment_size_in_mb: 32
+
+# Data directories (can be customized per node)
+data_file_directories:
+  - "{{ cassandra_data_dir }}/data"
+commitlog_directory: "{{ cassandra_data_dir }}/commitlog"
+saved_caches_directory: "{{ cassandra_data_dir }}/saved_caches"
+hints_directory: "{{ cassandra_data_dir }}/hints"
+cdc_raw_directory: "{{ cassandra_data_dir }}/cdc_raw"
+metadata_directory: "{{ cassandra_data_dir }}/metadata"
+
+# JVM options
+heap_size: "31G"
+heap_newsize: "8G"
+parallel_gc_threads: "{{ ansible_facts['processor_cores'] }}"  # Set to number of CPU cores
+conc_gc_threads: "{{ ansible_facts['processor_cores'] }}"      # Set to number of CPU cores
+gc_log_path: "{{ cassandra_log_dir }}/gc.log"
+jvm_extra_opts: []
+
+# Security settings
+authenticator: "com.datastax.cassandra.auth.AdvancedAuthenticator"
+authorizer: "com.datastax.cassandra.auth.AdvancedAuthorizer"
+role_manager: "com.datastax.cassandra.auth.AdvancedRoleManager"
+enable_client_encryption: false
+enable_internode_encryption: false
+
+# Logging
+log_level: "INFO"
+
+# Seed nodes (dynamically built from inventory where seed=true)
+# below works
+#seed_nodes_list: "{{ groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', 'true') | map(attribute='private_ip') | list | join(',') }}"
+#seed_nodes_list: "{{ (groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', 'true') | map(attribute='private_ip') | list) | map('regex_replace', '^(.*)$', '\\1:7000') | join(',') }}"
+seed_nodes_list: "{{ groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', 'true') | map(attribute='private_ip') | map('regex_replace', '$', ':' ~ storage_port) | list | join(',') }}"
+#alternate
+#seed_nodes_list: "{{ groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', 'true') | map(attribute='private_ip') | map('regex_replace', '^(.*)$', '\\1:' ~ storage_port) | list | join(',') }}"

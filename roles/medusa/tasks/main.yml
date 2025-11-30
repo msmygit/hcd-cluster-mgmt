@@ -1,0 +1,76 @@
+---
+# Main tasks for Cassandra Medusa installation
+
+- name: Include OS-specific tasks
+  include_tasks: "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Install Python pip (if not present)
+  package:
+    name: python3-pip
+    state: present
+  when: medusa_install_method == 'pip'
+
+- name: Install Medusa via pip
+  pip:
+    name: "{{ medusa_python_packages }}"
+    state: present
+    executable: pip3
+  when: medusa_install_method == 'pip'
+
+- name: Create Medusa configuration directory
+  file:
+    path: "{{ medusa_config_dir }}"
+    state: directory
+    owner: "{{ medusa_user }}"
+    group: "{{ medusa_group }}"
+    mode: '0755'
+
+- name: Create local backup directory (if using local storage)
+  file:
+    path: "{{ medusa_local_backup_dir }}"
+    state: directory
+    owner: "{{ medusa_user }}"
+    group: "{{ medusa_group }}"
+    mode: '0755'
+  when: medusa_storage_provider == 'local'
+
+- name: Configure Medusa medusa.ini
+  template:
+    src: medusa.ini.j2
+    dest: "{{ medusa_config_file }}"
+    owner: "{{ medusa_user }}"
+    group: "{{ medusa_group }}"
+    mode: '0600'
+
+- name: Create Medusa credentials file for S3 (if needed)
+  template:
+    src: s3_credentials.j2
+    dest: "{{ medusa_config_dir }}/.s3cfg"
+    owner: "{{ medusa_user }}"
+    group: "{{ medusa_group }}"
+    mode: '0600'
+  when: 
+    - medusa_storage_provider == 's3'
+    - medusa_s3_access_key_id != ''
+  no_log: true
+
+- name: Create Medusa GCS credentials file (if needed)
+  copy:
+    src: "{{ medusa_gcs_credentials_file }}"
+    dest: "{{ medusa_config_dir }}/gcs_credentials.json"
+    owner: "{{ medusa_user }}"
+    group: "{{ medusa_group }}"
+    mode: '0600'
+  when:
+    - medusa_storage_provider == 'gcs'
+    - medusa_gcs_credentials_file != ''
+  no_log: true
+
+- name: Verify Medusa installation
+  command: medusa --version
+  register: medusa_version_output
+  changed_when: false
+
+- name: Display Medusa version
+  debug:
+    msg: "Medusa installed: {{ medusa_version_output.stdout }}"

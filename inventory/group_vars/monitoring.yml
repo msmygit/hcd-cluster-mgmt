@@ -1,0 +1,20 @@
+---
+# MCAC configuration
+mcac_enabled: true
+mcac_version: "0.5.0"
+mcac_metrics_backend: "prometheus"
+mcac_prometheus_port: 9103
+
+# Reaper configuration
+reaper_enabled: true
+reaper_version: "3.6.1"
+reaper_install_type: "dedicated"  # or "colocated"
+reaper_ui_port: 8080
+reaper_storage_type: "cassandra"
+
+# Medusa configuration
+medusa_enabled: true
+medusa_version: "0.21.0"
+medusa_storage_provider: "s3"  # s3, gcs, azure, local
+medusa_bucket_name: "hcd-backups"
+medusa_backup_retention_days: 30

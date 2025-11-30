@@ -1,0 +1,61 @@
+---
+# Install HCD from tarball
+- name: Print debug helper values
+  debug: msg="hcd_tarball_path -> {{ hcd_tarball_path }} | playbook_dir -> {{ playbook_dir }}"
+
+- name: Check if HCD tarball exists locally
+  stat:
+    path: "{{ hcd_tarball_path }}"
+  delegate_to: localhost
+  register: tarball_stat
+  #become: false
+  vars:
+    ansible_become: false
+
+# - debug:
+#     var: tarball_stat
+#   tags: debug
+
+- name: Fail if HCD tarball not found
+  fail:
+    msg: "HCD tarball not found at {{ hcd_tarball_path }}. Please download it first."
+  when: not tarball_stat.stat.exists
+  tags: debug
+
+- name: Copy HCD tarball to remote host
+  copy:
+    src: "{{ hcd_tarball_path }}"
+    dest: "/tmp/{{ hcd_tarball_name }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Extract HCD tarball
+  unarchive:
+    src: "/tmp/{{ hcd_tarball_name }}"
+    dest: "{{ hcd_install_dir }}"
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+    owner: "{{ cassandra_user }}"
+    group: "{{ cassandra_group }}"
+    #creates: "{{ hcd_install_dir }}/bin/hcd"
+
+- import_tasks: validate_hcd_structure.yml
+
+- name: Remove temporary tarball
+  file:
+    path: "/tmp/{{ hcd_tarball_name }}"
+    state: absent
+
+- name: Set ownership of HCD installation
+  file:
+    path: "{{ hcd_install_dir }}"
+    owner: "{{ cassandra_user }}"
+    group: "{{ cassandra_group }}"
+    recurse: yes
+
+- name: Make HCD binaries executable
+  file:
+    path: "{{ hcd_install_dir }}/bin"
+    mode: '0755'
+    recurse: yes

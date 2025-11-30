@@ -1,0 +1,61 @@
+---
+- name: Configure HCD Cluster (Configuration Updates Only)
+  hosts: hcd_nodes
+  serial: "100%"  # Can run in parallel for configuration
+  become: yes
+  gather_facts: yes
+  roles:
+    - role: hcd_config
+      tags: ['config', 'hcd_config']
+
+- name: Rolling Restart After Configuration Changes
+  hosts: hcd_nodes
+  serial: 1  # One node at a time for restart
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Check if HCD service is running
+      systemd:
+        name: hcd
+      register: hcd_service_status
+
+    - name: Drain node before restart
+      shell: "{{ hcd_install_dir }}/bin/nodetool drain"
+      when: hcd_service_status.status.ActiveState == "active"
+      ignore_errors: yes
+
+    - name: Restart HCD service
+      systemd:
+        name: hcd
+        state: restarted
+      when: hcd_service_status.status.ActiveState == "active"
+
+    - name: Wait for native transport port (9042) to be available
+      wait_for:
+        port: 9042
+        timeout: 1200
+        host: "{{ private_ip }}"
+        state: started
+      when: hcd_service_status.status.ActiveState == "active"
+
+    - name: Wait for node to join cluster and be in UN state
+      shell: "{{ hcd_install_dir }}/bin/nodetool status | grep UN | grep {{ private_ip }}"
+      register: node_status
+      until: node_status.rc == 0
+      retries: 60
+      delay: 10
+      changed_when: false
+      when: hcd_service_status.status.ActiveState == "active"
+
+    - name: Display node status after restart
+      debug:
+        msg:
+          - "Node {{ inventory_hostname }} successfully restarted"
+          - "Status: {{ node_status.stdout }}"
+      when: hcd_service_status.status.ActiveState == "active"
+
+    - name: Pause before next node
+      pause:
+        seconds: 30
+        prompt: "Waiting 30 seconds before restarting next node..."
+      when: hcd_service_status.status.ActiveState == "active"

@@ -1,0 +1,38 @@
+# HCD Cluster Inventory
+# Multi-datacenter, multi-node support
+#
+# Format: public_ip private_ip=<private_ip> rack=<rack> dc=<dc> seed=<true|false>
+#
+# Host Variables:
+#   inventory_hostname (first parameter): Public IP for SSH and broadcast_address
+#   private_ip: Private IP for internal communication (listen_address, rpc_address)
+#   rack: Rack assignment for topology awareness
+#   dc: Datacenter assignment
+#   seed: Boolean (true/false) to identify seed nodes
+#
+# Note: Seed nodes are auto-inferred from hosts where seed=true
+
+[hcd_nodes:children]
+dc1
+#dc2
+
+[dc1]
+# Example nodes for datacenter 1
+35.208.20.114 private_ip=10.1.0.2 rack=rack1 dc=dc1 seed=true
+# 54.123.45.67 private_ip=10.0.1.10 rack=rack1 dc=dc1 seed=true
+# 54.123.45.68 private_ip=10.0.1.11 rack=rack1 dc=dc1 seed=false
+# 54.123.45.69 private_ip=10.0.1.12 rack=rack2 dc=dc1 seed=false
+
+[dc2]
+# Example nodes for datacenter 2
+# 54.234.56.78 private_ip=10.0.2.10 rack=rack1 dc=dc2 seed=true
+# 54.234.56.79 private_ip=10.0.2.11 rack=rack1 dc=dc2 seed=false
+# 54.234.56.80 private_ip=10.0.2.12 rack=rack2 dc=dc2 seed=false
+
+[reaper_nodes]
+# Dedicated Reaper nodes (optional - can be co-located)
+# 10.0.3.10
+
+[monitoring_nodes]
+# Monitoring infrastructure nodes
+# 10.0.4.10

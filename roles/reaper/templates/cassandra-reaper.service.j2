@@ -1,0 +1,28 @@
+[Unit]
+Description=Cassandra Reaper - Automated Repair Management
+Documentation=https://cassandra-reaper.io
+After=network.target
+
+[Service]
+Type=simple
+User={{ reaper_user }}
+Group={{ reaper_group }}
+Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
+Environment="REAPER_ENCRYPTION_KEY=changeme"
+WorkingDirectory={{ reaper_install_dir }}
+ExecStart=/usr/bin/java -jar {{ reaper_install_dir }}/server/target/cassandra-reaper-{{ reaper_version }}.jar server {{ reaper_config_dir }}/cassandra-reaper.yaml
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cassandra-reaper
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths={{ reaper_log_dir }}
+
+[Install]
+WantedBy=multi-user.target

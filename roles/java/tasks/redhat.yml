@@ -1,0 +1,21 @@
+---
+# RedHat/CentOS specific Java installation
+
+- name: Install OpenJDK {{ java_version }} (RedHat/CentOS)
+  yum:
+    name: "{{ java_package_redhat }}"
+    state: present
+
+- name: Set Java {{ java_version }} as default using alternatives
+  alternatives:
+    name: java
+    path: "{{ java_home_redhat }}/bin/java"
+    link: /usr/bin/java
+    priority: 1
+
+- name: Set JAVA_HOME environment variable
+  lineinfile:
+    path: /etc/environment
+    regexp: '^JAVA_HOME='
+    line: 'JAVA_HOME={{ java_home_redhat }}'
+    create: yes

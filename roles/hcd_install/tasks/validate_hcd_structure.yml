@@ -1,0 +1,69 @@
+---
+# Validate that HCD was extracted correctly into {{ hcd_install_dir }}
+
+- name: "Validate HCD installation directory exists: {{ hcd_install_dir }}"
+  stat:
+    path: "{{ hcd_install_dir }}"
+  register: hcd_dir_stat
+
+- name: Fail if HCD installation directory is missing
+  fail:
+    msg: >
+      ERROR: HCD installation directory '{{ hcd_install_dir }}' does not exist.
+      Extraction may have failed or created unexpected subdirectories.
+  when: not hcd_dir_stat.stat.exists
+
+
+# -------------------------------------------------------------
+# Validate flattened directory structure: /opt/hcd/bin
+# -------------------------------------------------------------
+
+- name: "Check HCD bin directory"
+  stat:
+    path: "{{ hcd_install_dir }}/bin"
+  register: hcd_bin_stat
+
+- name: Fail if bin/ directory is missing
+  fail:
+    msg: >
+      ERROR: Expected directory {{ hcd_install_dir }}/bin is missing.
+      Likely cause: tar extraction did NOT strip the top-level directory correctly.
+      Check if tarball contains 'hcd-1.2.4/' folder or MacOS metadata '._*' files.
+  when: not hcd_bin_stat.stat.isdir
+
+
+# -------------------------------------------------------------
+# Validate Cassandra config path
+# -------------------------------------------------------------
+
+- name: "Check Cassandra YAML path"
+  stat:
+    path: "{{ cassandra_yaml_path }}"
+  register: cass_yaml_stat
+
+- name: Fail if cassandra.yaml missing
+  fail:
+    msg: >
+      ERROR: Expected Cassandra config file '{{ cassandra_yaml_path }}' does not exist.
+      This strongly indicates the directory structure is incorrect:
+      Current extracted structure might still be '{{ hcd_install_dir }}/hcd-1.2.4/...'
+      Instead of being flattened into '{{ hcd_install_dir }}/resources/...'.
+  when: not cass_yaml_stat.stat.exists
+
+
+# -------------------------------------------------------------
+# Optional: Warn if subfolder like hcd-1.2.4/ exists
+# -------------------------------------------------------------
+
+- name: Detect incorrect nested directory (e.g. {{ hcd_install_dir }}/hcd-1.2.4)
+  stat:
+    path: "{{ hcd_install_dir }}/hcd-*"
+  register: hcd_nested_stat
+  ignore_errors: yes
+
+- name: Warn if nested versioned directory found
+  debug:
+    msg: >
+      WARNING: Found nested directory inside {{ hcd_install_dir }} — structure may be incorrect.
+      Offending folder: {{ hcd_nested_stat.stat.path }}
+  when: hcd_nested_stat.stat.exists

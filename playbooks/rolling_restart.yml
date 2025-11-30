@@ -1,0 +1,63 @@
+---
+- name: Rolling Restart of HCD Cluster
+  hosts: hcd_nodes
+  serial: 1  # One node at a time
+  gather_facts: yes
+  tasks:
+    - name: Check current node status
+      shell: "{{ hcd_install_dir }}/bin/nodetool status"
+      register: pre_restart_status
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Drain node before restart
+      shell: "{{ hcd_install_dir }}/bin/nodetool drain"
+      ignore_errors: yes
+
+    - name: Stop HCD service
+      systemd:
+        name: hcd
+        state: stopped
+
+    - name: Wait for service to stop
+      wait_for:
+        port: 9042
+        host: "{{ private_ip }}"
+        state: stopped
+        timeout: 300
+
+    - name: Start HCD service
+      systemd:
+        name: hcd
+        state: started
+
+    - name: Wait for native transport port (9042) to be available
+      wait_for:
+        port: 9042
+        timeout: 1200
+        host: "{{ private_ip }}"
+        state: started
+
+    - name: Wait for node to join cluster and be in UN state
+      shell: "{{ hcd_install_dir }}/bin/nodetool status | grep UN | grep {{ private_ip }}"
+      register: node_status
+      until: node_status.rc == 0
+      retries: 60
+      delay: 10
+      changed_when: false
+
+    - name: Verify node is fully operational
+      shell: "{{ hcd_install_dir }}/bin/nodetool info"
+      register: node_info
+      changed_when: false
+
+    - name: Display node status after restart
+      debug:
+        msg:
+          - "Node {{ inventory_hostname }} successfully restarted"
+          - "Status: {{ node_status.stdout }}"
+
+    - name: Pause before next node
+      pause:
+        seconds: 30
+        prompt: "Waiting 30 seconds before restarting next node..."

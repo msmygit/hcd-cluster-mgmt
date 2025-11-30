@@ -1,0 +1,8 @@
+---
+# Handlers for MCAC role
+
+- name: Restart HCD
+  systemd:
+    name: hcd
+    state: restarted
+  listen: "Restart HCD"

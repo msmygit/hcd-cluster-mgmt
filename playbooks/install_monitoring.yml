@@ -1,0 +1,60 @@
+---
+- name: Install MCAC (Metric Collector for Apache Cassandra)
+  hosts: hcd_nodes
+  serial: "100%"  # Can run in parallel
+  become: yes
+  gather_facts: yes
+  roles:
+    - role: mcac
+      tags: ['monitoring', 'mcac']
+
+- name: Rolling Restart After MCAC Installation
+  hosts: hcd_nodes
+  serial: 1  # One node at a time for restart
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Drain node before restart
+      shell: "{{ hcd_install_dir }}/bin/nodetool drain"
+      ignore_errors: yes
+
+    - name: Restart HCD service to load MCAC agent
+      systemd:
+        name: hcd
+        state: restarted
+
+    - name: Wait for native transport port (9042) to be available
+      wait_for:
+        port: 9042
+        timeout: 1200
+        host: "{{ private_ip }}"
+        state: started
+
+    - name: Wait for node to join cluster and be in UN state
+      shell: "{{ hcd_install_dir }}/bin/nodetool status | grep UN | grep {{ private_ip }}"
+      register: node_status
+      until: node_status.rc == 0
+      retries: 60
+      delay: 10
+      changed_when: false
+
+    - name: Verify MCAC Prometheus endpoint is accessible
+      uri:
+        url: "http://{{ private_ip }}:{{ mcac_prometheus_port }}/metrics"
+        method: GET
+        status_code: 200
+      register: mcac_check
+      retries: 5
+      delay: 10
+      until: mcac_check.status == 200
+
+    - name: Display MCAC status
+      debug:
+        msg:
+          - "Node {{ inventory_hostname }} successfully restarted with MCAC"
+          - "Prometheus metrics available at: http://{{ inventory_hostname }}:{{ mcac_prometheus_port }}/metrics"
+
+    - name: Pause before next node
+      pause:
+        seconds: 30
+        prompt: "Waiting 30 seconds before restarting next node..."

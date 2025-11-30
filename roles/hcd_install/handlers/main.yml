@@ -1,0 +1,6 @@
+---
+# Handlers for hcd_install role
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes

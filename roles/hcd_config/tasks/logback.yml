@@ -1,0 +1,15 @@
+---
+# Configure logback.xml
+
+- name: Set log level in logback.xml
+  replace:
+    path: "{{ logback_xml_path }}"
+    regexp: '<level>INFO</level>'
+    replace: '<level>{{ log_level }}</level>'
+    backup: yes
+
+- name: Update log directory path in logback.xml
+  replace:
+    path: "{{ logback_xml_path }}"
+    regexp: '\$\{cassandra\.logdir\}'
+    replace: '{{ cassandra_log_dir }}'

@@ -1,0 +1,54 @@
+---
+# Cassandra Reaper default variables
+
+# Reaper version and download
+reaper_version: "4.0.1"
+reaper_download_url: "https://github.com/thelastpickle/cassandra-reaper/releases/download/{{ reaper_version }}/cassandra-reaper-{{ reaper_version }}-release.tar.gz"
+reaper_install_dir: "/opt/cassandra-reaper"
+reaper_config_dir: "{{ reaper_install_dir }}/resource"
+
+# Reaper user and group
+reaper_user: "reaper"
+reaper_group: "reaper"
+
+# Reaper service settings
+reaper_port: 8080
+reaper_admin_port: 8081
+
+# Reaper storage backend (cassandra or memory)
+reaper_storage_type: "cassandra"
+
+# Cassandra connection settings for Reaper
+reaper_cassandra_contact_points:
+  - "{{ groups['hcd_nodes'][0] }}"
+reaper_cassandra_port: 9042
+reaper_cassandra_keyspace: "reaper_db"
+reaper_cassandra_local_dc: "{{ dc }}"
+
+# Authentication (if enabled in Cassandra)
+reaper_cassandra_auth_enabled: "{{ cassandra_authenticator != 'AllowAllAuthenticator' }}"
+reaper_cassandra_username: "cassandra"
+reaper_cassandra_password: "cassandra"
+
+# Reaper repair settings
+reaper_segment_count_per_node: 16
+reaper_repair_intensity: 0.9
+reaper_repair_run_threads: 15
+reaper_hanging_repair_timeout_mins: 30
+reaper_schedule_days_between: 7
+
+# Auto-scheduling settings
+reaper_auto_scheduling_enabled: true
+reaper_auto_scheduling_initial_delay_period: "PT15S"
+reaper_auto_scheduling_period_between_polls: "PT10M"
+reaper_auto_scheduling_time_before_first_schedule: "PT5M"
+reaper_auto_scheduling_schedule_spread_period: "PT6H"
+
+# JMX settings
+reaper_jmx_connection_timeout: 20
+reaper_jmx_ports:
+  - 7199
+
+# Logging
+reaper_log_dir: "/var/log/cassandra-reaper"
+reaper_log_level: "INFO"

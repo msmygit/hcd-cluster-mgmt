@@ -1,0 +1,21 @@
+---
+# RedHat/CentOS specific tasks
+
+- name: Install required packages (RedHat/CentOS)
+  yum:
+    name: "{{ required_packages_redhat }}"
+    state: present
+    update_cache: yes
+
+- name: Ensure Chrony is installed and running (RedHat/CentOS)
+  block:
+    - name: Install chrony
+      yum:
+        name: chrony
+        state: present
+
+    - name: Ensure chrony is running
+      systemd:
+        name: chronyd
+        state: started
+        enabled: yes

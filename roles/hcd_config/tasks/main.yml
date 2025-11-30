@@ -1,0 +1,14 @@
+---
+# Main tasks for hcd_config role
+
+- name: Configure cassandra.yaml
+  include_tasks: cassandra_yaml.yml
+
+- name: Configure JVM options
+  include_tasks: jvm_options.yml
+
+- name: Configure rack and datacenter properties
+  include_tasks: rackdc.yml
+
+- name: Configure logback
+  include_tasks: logback.yml

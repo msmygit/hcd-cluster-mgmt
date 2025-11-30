@@ -1,0 +1,3 @@
+---
+datacenter: "dc1"
+# Seed nodes are auto-discovered from inventory where seed=true

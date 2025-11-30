@@ -1,0 +1,39 @@
+---
+# Configure JVM options using regex replacements
+
+- name: Set heap size -Xms
+  replace:
+    path: "{{ jvm_options_path }}"
+    regexp: '^-Xms\d+[GMK]'
+    replace: "-Xms{{ heap_size }}"
+    backup: yes
+
+- name: Set heap size -Xmx
+  replace:
+    path: "{{ jvm_options_path }}"
+    regexp: '^-Xmx\d+[GMK]'
+    replace: "-Xmx{{ heap_size }}"
+
+- name: Set new generation size -Xmn
+  replace:
+    path: "{{ jvm_options_path }}"
+    regexp: '^-Xmn\d+[GMK]'
+    replace: "-Xmn{{ heap_newsize }}"
+
+- name: Uncomment and set ParallelGCThreads based on CPU cores
+  lineinfile:
+    path: "{{ jvm_options_path }}"
+    regexp: '^#?\s*-XX:ParallelGCThreads=.*'
+    line: "-XX:ParallelGCThreads={{ parallel_gc_threads }}"
+
+- name: Uncomment and set ConcGCThreads based on CPU cores
+  lineinfile:
+    path: "{{ jvm_options_path }}"
+    regexp: '^#?\s*-XX:ConcGCThreads=.*'
+    line: "-XX:ConcGCThreads={{ conc_gc_threads }}"
+
+- name: Uncomment and configure GC logging
+  lineinfile:
+    path: "{{ jvm_options_path }}"
+    regexp: '^#?\s*-Xlog:gc=.*'
+    line: "-Xlog:gc=info,heap*=debug,age*=debug,safepoint=info,promotion*=debug:file={{ gc_log_path }}:time,uptime,pid,tid,level:filecount=10,filesize=10485760"

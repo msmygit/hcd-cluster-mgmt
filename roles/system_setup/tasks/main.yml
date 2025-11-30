@@ -1,0 +1,62 @@
+---
+# Main tasks for system_setup role
+
+- name: Include OS-specific tasks
+  include_tasks: "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Disable swap
+  when: disable_swap | bool
+  block:
+    - name: Disable swap immediately
+      command: swapoff -a
+      changed_when: false
+
+    - name: Remove swap from /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^\s*[^#].*\s+swap\s+'
+        state: absent
+
+- name: Configure system limits
+  template:
+    src: limits.conf.j2
+    dest: /etc/security/limits.d/cassandra.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Configure sysctl parameters
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+    sysctl_file: /etc/sysctl.d/99-cassandra.conf
+  loop:
+    - { name: 'vm.max_map_count', value: '{{ sysctl_vm_max_map_count }}' }
+    - { name: 'vm.swappiness', value: '{{ sysctl_vm_swappiness }}' }
+    - { name: 'net.core.rmem_max', value: '{{ sysctl_net_core_rmem_max }}' }
+    - { name: 'net.core.wmem_max', value: '{{ sysctl_net_core_wmem_max }}' }
+    - { name: 'net.ipv4.tcp_rmem', value: '{{ sysctl_net_ipv4_tcp_rmem }}' }
+    - { name: 'net.ipv4.tcp_wmem', value: '{{ sysctl_net_ipv4_tcp_wmem }}' }
+    - { name: 'net.core.netdev_max_backlog', value: '{{ sysctl_net_core_netdev_max_backlog }}' }
+    - { name: 'net.core.somaxconn', value: '{{ sysctl_net_core_somaxconn }}' }
+
+- name: Set I/O scheduler for block devices
+  shell: |
+    for dev in /sys/block/*/queue/scheduler; do
+      if [ -f "$dev" ]; then
+        echo {{ io_scheduler }} > "$dev" 2>/dev/null || true
+      fi
+    done
+  changed_when: false
+
+- name: Create I/O scheduler udev rule
+  copy:
+    content: |
+      # Set I/O scheduler for all block devices
+      ACTION=="add|change", KERNEL=="sd[a-z]|nvme[0-9]n[0-9]", ATTR{queue/scheduler}="{{ io_scheduler }}"
+    dest: /etc/udev/rules.d/60-scheduler.rules
+    owner: root
+    group: root
+    mode: '0644'

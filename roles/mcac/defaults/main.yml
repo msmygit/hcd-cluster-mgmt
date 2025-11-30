@@ -1,0 +1,35 @@
+---
+# MCAC (Metric Collector for Apache Cassandra) default variables
+
+# MCAC version and download
+mcac_version: "0.3.6"
+mcac_download_url: "https://github.com/datastax/metric-collector-for-apache-cassandra/releases/download/v{{ mcac_version }}/datastax-mcac-agent-{{ mcac_version }}.tar.gz"
+mcac_install_dir: "/opt/mcac"
+mcac_config_dir: "{{ mcac_install_dir }}/config"
+
+# MCAC agent JAR path (will be added to cassandra-env.sh)
+mcac_agent_jar: "{{ mcac_install_dir }}/lib/datastax-mcac-agent-{{ mcac_version }}.jar"
+
+# Metrics collection settings
+mcac_metrics_enabled: true
+mcac_sampling_interval: 30  # seconds
+
+# Prometheus settings
+mcac_prometheus_enabled: "{{ prometheus_enabled | default(true) }}"
+mcac_prometheus_port: 9103
+
+# Graphite settings (optional)
+mcac_graphite_enabled: false
+mcac_graphite_host: "localhost"
+mcac_graphite_port: 2003
+
+# Metrics to collect
+mcac_collect_jvm_metrics: true
+mcac_collect_os_metrics: true
+mcac_collect_cassandra_metrics: true
+
+# Log settings
+mcac_log_dir: "/var/log/cassandra"
+mcac_log_level: "INFO"
+
+# Made with Bob

@@ -1,0 +1,73 @@
+---
+# Cassandra Medusa (Backup/Restore) default variables
+
+# Medusa installation method (pip or package)
+medusa_install_method: "pip"
+medusa_version: "0.26.0"
+
+# Medusa user and group
+medusa_user: "cassandra"
+medusa_group: "cassandra"
+
+# Medusa configuration directory
+medusa_config_dir: "/etc/medusa"
+medusa_config_file: "{{ medusa_config_dir }}/medusa.ini"
+
+# Cassandra settings
+medusa_cassandra_bin_dir: "{{ hcd_install_dir }}/bin"
+medusa_cassandra_config_dir: "{{ hcd_install_dir }}/resources/cassandra/conf"
+medusa_cassandra_data_dir: "{{ cassandra_data_dir }}"
+medusa_cassandra_is_ccm: 0
+
+# Storage backend (local, s3, gcs, azure)
+medusa_storage_provider: "s3"
+medusa_bucket_name: "cassandra-backups"
+medusa_base_path: "{{ hcd_cluster_name }}"
+
+# S3 settings (if using S3)
+medusa_s3_region: "us-east-1"
+medusa_s3_access_key_id: ""
+medusa_s3_secret_access_key: ""
+medusa_s3_endpoint: ""  # For S3-compatible storage like MinIO
+
+# GCS settings (if using GCS)
+medusa_gcs_credentials_file: ""
+medusa_gcs_project_id: ""
+
+# Azure settings (if using Azure)
+medusa_azure_storage_account: ""
+medusa_azure_storage_key: ""
+
+# Local storage settings (if using local)
+medusa_local_backup_dir: "/var/lib/cassandra/backups"
+
+# Backup settings
+medusa_backup_grace_period_in_days: 10
+medusa_backup_threads: 4
+medusa_concurrent_transfers: 1
+medusa_multi_part_upload_threshold: 104857600  # 100MB
+
+# Restore settings
+medusa_restore_verify: true
+medusa_restore_keep_auth: true
+
+# CQL settings
+medusa_cql_username: "cassandra"
+medusa_cql_password: "cassandra"
+medusa_cql_port: 9042
+
+# Monitoring
+medusa_monitoring_enabled: false
+medusa_monitoring_provider: "local"
+
+# Grpc and checks
+medusa_use_sudo: true
+medusa_certfile: ""
+medusa_keyfile: ""
+medusa_ca_cert: ""
+
+# Python packages required
+medusa_python_packages:
+  - "cassandra-medusa=={{ medusa_version }}"
+  - "cassandra-driver"
+  - "python-dateutil"

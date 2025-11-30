@@ -1,0 +1,13 @@
+---
+# Default variables for hcd_config role
+
+# Paths
+cassandra_conf_dir: "{{ hcd_install_dir }}/resources/cassandra/conf"
+cassandra_yaml_path: "{{ cassandra_conf_dir }}/cassandra.yaml"
+cassandra_rackdc_path: "{{ cassandra_conf_dir }}/cassandra-rackdc.properties"
+logback_xml_path: "{{ cassandra_conf_dir }}/logback.xml"
+
+# JVM options files
+jvm11_options_path: "{{ cassandra_conf_dir }}/jvm11-server.options"
+jvm17_options_path: "{{ cassandra_conf_dir }}/jvm17-server.options"
+jvm_options_path: "{{ cassandra_conf_dir }}/jvm{{ java_version }}-server.options"

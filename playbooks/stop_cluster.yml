@@ -1,0 +1,47 @@
+---
+- name: Stop HCD Cluster Services
+  hosts: hcd_nodes
+  serial: 1  # Stop one node at a time
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Check if HCD service is running
+      systemd:
+        name: hcd
+      register: hcd_service_status
+      ignore_errors: yes
+
+    - name: Drain node before stopping
+      shell: "{{ hcd_install_dir }}/bin/nodetool drain"
+      when: hcd_service_status.status.ActiveState == "active"
+      ignore_errors: yes
+
+    - name: Stop HCD service
+      systemd:
+        name: hcd
+        state: stopped
+      when: hcd_service_status.status.ActiveState == "active"
+
+    - name: Wait for service to stop
+      wait_for:
+        port: 9042
+        host: "{{ private_ip }}"
+        state: stopped
+        timeout: 300
+      when: hcd_service_status.status.ActiveState == "active"
+
+    - name: Display node status
+      debug:
+        msg: "Node {{ inventory_hostname }} successfully stopped"
+      when: hcd_service_status.status.ActiveState == "active"
+
+    - name: Display skip message
+      debug:
+        msg: "Node {{ inventory_hostname }} was not running, skipping"
+      when: hcd_service_status.status.ActiveState != "active"
+
+    - name: Pause before stopping next node
+      pause:
+        seconds: 10
+        prompt: "Waiting 10 seconds before stopping next node..."
+      when: hcd_service_status.status.ActiveState == "active"

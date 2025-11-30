@@ -1,0 +1,14 @@
+---
+# Main tasks for java role
+
+- name: Include OS-specific tasks
+  include_tasks: "{{ ansible_facts['os_family'] | lower }}.yml"
+
+- name: Verify Java installation
+  command: java -version
+  register: java_version_output
+  changed_when: false
+
+- name: Display Java version
+  debug:
+    var: java_version_output.stderr_lines

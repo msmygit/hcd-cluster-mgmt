@@ -1,0 +1,44 @@
+---
+- name: Install HCD Cluster - Parallel Preparation
+  hosts: hcd_nodes
+  serial: "100%"  # Run in parallel for speed
+  gather_facts: yes
+  roles:
+    - system_setup
+    - java
+    - hcd_install
+    - { role: hcd_config, tags: 'debug_config' }
+
+- name: Start HCD Services - Rolling Start
+  hosts: hcd_nodes
+  serial: 1  # Start one node at a time
+  gather_facts: yes
+  tasks:
+    - name: Start HCD service
+      systemd:
+        name: hcd
+        state: started
+        enabled: yes
+
+    - name: Wait for native transport port (9042) to be available
+      wait_for:
+        port: 9042
+        timeout: 1200
+        host: "{{ private_ip }}"
+        state: started
+
+    - name: Wait for node to be in UN (Up/Normal) state
+      shell: "{{ hcd_install_dir }}/bin/nodetool status | grep UN | grep {{ private_ip }}"
+      register: node_status
+      until: node_status.rc == 0
+      retries: 60
+      delay: 10
+      changed_when: false
+
+    - name: Display node status
+      debug:
+        msg: "Node {{ inventory_hostname }} is UP and NORMAL"
+
+    - name: Pause before starting next node
+      pause:
+        seconds: 30

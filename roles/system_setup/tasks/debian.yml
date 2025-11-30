@@ -1,0 +1,26 @@
+---
+# Debian/Ubuntu specific tasks
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install required packages (Debian/Ubuntu)
+  apt:
+    name: "{{ required_packages_debian }}"
+    state: present
+    update_cache: yes
+
+- name: Ensure NTP is installed and running (Debian/Ubuntu)
+  block:
+    - name: Install chrony
+      apt:
+        name: chrony
+        state: present
+
+    - name: Ensure chrony is running
+      systemd:
+        name: chrony
+        state: started
+        enabled: yes

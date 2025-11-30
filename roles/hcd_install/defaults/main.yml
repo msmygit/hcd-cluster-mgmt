@@ -1,0 +1,30 @@
+---
+# Default variables for hcd_install role
+
+# HCD installation
+hcd_version: "1.2.4"
+hcd_tarball_name: "hcd-{{ hcd_version }}.tar.gz"
+hcd_tarball_path: "{{ playbook_dir }}/../{{ hcd_tarball_name }}"
+hcd_install_dir: "/opt/hcd"
+
+# Cassandra user and group
+cassandra_user: "cassandra"
+cassandra_group: "cassandra"
+cassandra_uid: 999
+cassandra_gid: 999
+
+# Directories
+cassandra_data_dir: "/var/lib/cassandra"
+cassandra_log_dir: "/var/log/cassandra"
+cassandra_conf_dir: "{{ hcd_install_dir }}/resources/cassandra/conf"
+
+# Data subdirectories
+data_directories:
+  - "{{ cassandra_data_dir }}/data"
+  - "{{ cassandra_data_dir }}/commitlog"
+  - "{{ cassandra_data_dir }}/saved_caches"
+  - "{{ cassandra_data_dir }}/hints"
+  - "{{ cassandra_data_dir }}/cdc_raw"
+  - "{{ cassandra_data_dir }}/metadata"
+  - "{{ cassandra_log_dir }}"
+  - "{{ hcd_install_dir }}"

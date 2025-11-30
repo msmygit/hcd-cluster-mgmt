@@ -1,0 +1,15 @@
+---
+# Configure cassandra-rackdc.properties
+
+- name: Set datacenter in cassandra-rackdc.properties
+  lineinfile:
+    path: "{{ cassandra_rackdc_path }}"
+    regexp: '^dc='
+    line: "dc={{ datacenter }}"
+    backup: yes
+
+- name: Set rack in cassandra-rackdc.properties
+  lineinfile:
+    path: "{{ cassandra_rackdc_path }}"
+    regexp: '^rack='
+    line: "rack={{ rack }}"
