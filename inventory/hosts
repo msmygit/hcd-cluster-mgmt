@@ -18,7 +18,7 @@ dc1
 
 [dc1]
 # Example nodes for datacenter 1
-35.208.20.114 private_ip=10.1.0.2 rack=rack1 dc=dc1 seed=true
+136.116.216.148 private_ip=10.1.0.2 rack=rack1 dc=dc1 seed=true
 # 54.123.45.67 private_ip=10.0.1.10 rack=rack1 dc=dc1 seed=true
 # 54.123.45.68 private_ip=10.0.1.11 rack=rack1 dc=dc1 seed=false
 # 54.123.45.69 private_ip=10.0.1.12 rack=rack2 dc=dc1 seed=false

@@ -7,7 +7,7 @@
     state: present
     update_cache: yes
 
-- name: Ensure Chrony is installed and running (RedHat/CentOS)
+- name: Ensure chrony is installed and running (RedHat/CentOS)
   block:
     - name: Install chrony
       yum:

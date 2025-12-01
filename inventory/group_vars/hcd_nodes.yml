@@ -26,7 +26,7 @@ endpoint_snitch: "GossipingPropertyFileSnitch"
 # Performance tuning (auto-calculated based on hardware)
 concurrent_reads: "{{ ansible_facts['processor_cores'] * 2 }}"
 concurrent_writes: "{{ ansible_facts['processor_cores'] * 2 }}"
-concurrent_counter_writes: "{{ ansible_facts['processor_cores'] * 2 }}"
+concurrent_counter_writes: "{{ ansible_facts['processor_cores'] * 8 }}"
 concurrent_compactors: "{{ ansible_facts['processor_cores'] }}"  # Set to number of CPU cores
 compaction_throughput_mb_per_sec: 64
 stream_throughput_outbound_megabits_per_sec: 400
@@ -72,6 +72,7 @@ log_level: "INFO"
 # below works
 #seed_nodes_list: "{{ groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', 'true') | map(attribute='private_ip') | list | join(',') }}"
 #seed_nodes_list: "{{ (groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', 'true') | map(attribute='private_ip') | list) | map('regex_replace', '^(.*)$', '\\1:7000') | join(',') }}"
+# below works - adds as private_ip:storage_port
 seed_nodes_list: "{{ groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', 'true') | map(attribute='private_ip') | map('regex_replace', '$', ':' ~ storage_port) | list | join(',') }}"
 #alternate
 #seed_nodes_list: "{{ groups['hcd_nodes'] | map('extract', hostvars) | selectattr('seed', 'equalto', 'true') | map(attribute='private_ip') | map('regex_replace', '^(.*)$', '\\1:' ~ storage_port) | list | join(',') }}"

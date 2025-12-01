@@ -1,14 +1,54 @@
+# This play will perform a rolling restart of an existing vnode enabled cluster.
+# Note: Can also leverage -> --limit "<IP>" or -i <IP>,
+# ansible-playbook -i inventory/hosts playbooks/rolling_restart.yml --extra-vars "run_manual_repair=<y_or_n> run_upgradesstables=<y_or_n>" --key-file PRIVATE_KEY_FILE_PATH --user USERNAME -vv
+
 ---
 - name: Rolling Restart of HCD Cluster
   hosts: hcd_nodes
   serial: 1  # One node at a time
   gather_facts: yes
+  vars_prompt:
+    - name: run_manual_repair
+      prompt: "Do you want to run manual repair before restarting the cluster? (y/n). Default is 'y'"
+      default: "y"
+      private: false
+    - name: run_upgradesstables
+      prompt: "Do you want to run nodetool upgradesstables before restarting the cluster nodes? (y/n). Default is 'y'"
+      default: "y"
+      private: false
+  #roles:
   tasks:
+    - name: "Get the current installed DSE version"
+      shell: "{{ hcd_install_dir }}/hcd -v"
+      register: current_hcd_version
+
+    - name: "Printing debug information for currently installed HCD version value:"
+      debug:
+        msg: "{{ current_hcd_version.stdout }}"
+      when:
+        - current_hcd_version is defined
+
     - name: Check current node status
       shell: "{{ hcd_install_dir }}/bin/nodetool status"
       register: pre_restart_status
       ignore_errors: yes
       changed_when: false
+
+    - name: "Understanding repair job"
+      debug:
+        msg: "Manual anti-entropy repair could run for hours/days depending on various factors such as, but not limited to, the size of data on the node, network speed."
+      when:
+        - run_manual_repair|lower == 'y'
+
+    - name: "Perform nodetool repair -pr -local on the node"
+      shell: "{{ hcd_install_dir }}/bin/nodetool repair -pr -local"
+      when:
+        - run_manual_repair|lower == 'y'
+
+    - name: "Perform 'nodetool upgradesstables --jobs 0' on the node to ensure all SSTables are on the current version"
+      shell: "{{ hcd_install_dir }}/bin/nodetool upgradesstables --jobs 0"
+      when:
+        - run_upgradesstables|lower == 'y'
 
     - name: Drain node before restart
       shell: "{{ hcd_install_dir }}/bin/nodetool drain"

@@ -14,11 +14,12 @@
     regexp: '^-Xmx\d+[GMK]'
     replace: "-Xmx{{ heap_size }}"
 
-- name: Set new generation size -Xmn
-  replace:
-    path: "{{ jvm_options_path }}"
-    regexp: '^-Xmn\d+[GMK]'
-    replace: "-Xmn{{ heap_newsize }}"
+# https://docs.datastax.com/en/hyper-converged-database/1.2/manage/configure/recommended-settings.html
+# - name: Set new generation size -Xmn
+#   replace:
+#     path: "{{ jvm_options_path }}"
+#     regexp: '^-Xmn\d+[GMK]'
+#     replace: "-Xmn{{ heap_newsize }}"
 
 - name: Uncomment and set ParallelGCThreads based on CPU cores
   lineinfile:

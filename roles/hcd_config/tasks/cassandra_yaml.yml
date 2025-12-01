@@ -74,7 +74,7 @@
   lineinfile:
     path: "{{ cassandra_yaml_path }}"
     regexp: '^#?\s*broadcast_address:\s*.*'
-    line: "broadcast_address: {{ inventory_hostname }}"
+    line: "broadcast_address: {{ private_ip }}"
 
 - name: Set rpc_address to private IP
   lineinfile:
@@ -105,6 +105,12 @@
     path: "{{ cassandra_yaml_path }}"
     regexp: '^#?concurrent_writes:\s*.*'
     line: "concurrent_writes: {{ concurrent_writes }}"
+
+- name: Set concurrent_counter_writes
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?concurrent_counter_writes:\s*.*'
+    line: "concurrent_counter_writes: {{ concurrent_counter_writes }}"
 
 - name: Uncomment and set concurrent_compactors based on CPU cores
   lineinfile:

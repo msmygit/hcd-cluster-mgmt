@@ -15,6 +15,9 @@ limits_as_soft: unlimited
 limits_as_hard: unlimited
 
 # Sysctl parameters
+sysctl_net_ipv4_tcp_keepalive_time: 60
+sysctl_net_ipv4_tcp_keepalive_probes: 3
+sysctl_net_ipv4_tcp_keepalive_intvl: 10
 sysctl_vm_max_map_count: 1048575
 sysctl_vm_swappiness: 0
 sysctl_net_core_rmem_max: 16777216
@@ -25,12 +28,16 @@ sysctl_net_core_netdev_max_backlog: 2500
 sysctl_net_core_somaxconn: 65000
 
 # I/O scheduler
-io_scheduler: "deadline"  # deadline or noop for SSDs
+io_scheduler: "mq-deadline"  # deadline or noop for SSDs
+
+# nr_requests
+# https://tobert.github.io/pages/als-cassandra-21-tuning-guide.html
+nr_requests: "{{ 128 if ansible_facts['processor_cores'] > 64 else 32 }}"
 
 # Required packages
 required_packages_debian:
   - python3
-#  - python3-pip
+  - python3-pip
   - curl
   - wget
   - net-tools
