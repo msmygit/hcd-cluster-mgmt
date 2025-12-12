@@ -6,13 +6,13 @@
     name: "{{ java_package_debian }}"
     state: present
     update_cache: yes
-
-# - name: Set Java {{ java_version }} as default using update-alternatives
-#   alternatives:
-#     name: java
-#     path: "{{ java_home_debian }}/bin/java"
-#     link: /usr/bin/java
-#     priority: 1
+# sudo apt install openjdk-11-jdk -y is how I was able to install it
+- name: Set Java {{ java_version }} as default using update-alternatives
+  alternatives:
+    name: java
+    path: "{{ java_home_debian }}/bin/java"
+    link: /usr/bin/java
+    priority: 1
 
 # - name: Set JAVA_HOME environment variable
 #   lineinfile:
@@ -20,3 +20,7 @@
 #     regexp: '^JAVA_HOME='
 #     line: 'JAVA_HOME={{ java_home_debian }}'
 #     create: yes
+
+# $ cat /etc/environment
+# PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+# it doesn't have JAVA_HOME set, so we need to set it

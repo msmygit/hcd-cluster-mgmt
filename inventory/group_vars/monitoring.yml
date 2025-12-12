@@ -1,13 +1,13 @@
 ---
 # MCAC configuration
 mcac_enabled: true
-mcac_version: "0.5.0"
+mcac_version: "0.3.6"
 mcac_metrics_backend: "prometheus"
 mcac_prometheus_port: 9103
 
 # Reaper configuration
 reaper_enabled: true
-reaper_version: "3.6.1"
+reaper_version: "4.0.1"
 reaper_install_type: "dedicated"  # or "colocated"
 reaper_ui_port: 8080
 reaper_storage_type: "cassandra"

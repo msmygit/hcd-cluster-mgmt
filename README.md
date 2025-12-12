@@ -87,6 +87,9 @@ vim inventory/group_vars/dc1.yml
 ansible -i inventory/hosts hcd_nodes -m ping --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
 ```
 
+> [!TIP]
+> This assumes the user as `ubuntu`. For others, just suffix --extra-vars "ansible_user=YOUR_USERNAME" to the ansible command.
+
 ### 5. Install HCD Cluster
 
 ```bash

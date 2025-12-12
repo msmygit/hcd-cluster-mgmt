@@ -3,4 +3,6 @@
 
 java_version: "11"
 java_package_debian: "openjdk-{{ java_version }}-jdk"
-java_package_redhat: "java-{{ java_version }}-openjdk-devel"
+#java_package_redhat: "java-{{ java_version }}-openjdk-devel"
+# For Amazon Linux, use:
+java_package_redhat: "java-openjdk{{ java_version }}"

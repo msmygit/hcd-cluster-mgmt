@@ -70,7 +70,7 @@
     regexp: '^#?listen_address:\s*.*'
     line: "listen_address: {{ private_ip }}"
 
-- name: Uncomment and set broadcast_address to public IP
+- name: Uncomment and set broadcast_address to private IP
   lineinfile:
     path: "{{ cassandra_yaml_path }}"
     regexp: '^#?\s*broadcast_address:\s*.*'

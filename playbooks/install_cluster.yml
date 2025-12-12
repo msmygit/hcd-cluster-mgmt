@@ -4,6 +4,10 @@
   serial: "100%"  # Run in parallel for speed
   gather_facts: yes
   roles:
+    - { role: python_3_11_install, tags: [debug_python311], vars: { python_make_default: false } }
+      # vars:
+      #   python_make_default: false   # or true if you want to force default
+      # tags: 'debug_python311'
     - system_setup
     - java
     - hcd_install

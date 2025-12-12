@@ -1,0 +1,4 @@
+---
+# Default variables for python_3_11_install role
+
+cassandra_venv: ".venv"
