@@ -1,13 +1,15 @@
 ---
 # Main tasks for Cassandra Reaper installation
 
-- name: Create Reaper user
-  user:
-    name: "{{ reaper_user }}"
-    group: "{{ reaper_group }}"
-    system: yes
-    shell: /bin/false
-    create_home: no
+# - name: Create Reaper user
+#   user:
+#     name: "{{ reaper_user }}"
+#     group: "{{ reaper_group }}"
+#     system: yes
+#     shell: /bin/false
+#     create_home: no
+# - name: Include user creation tasks
+#   include_tasks: user.yml
 
 - name: Create Reaper installation directory
   file:
@@ -24,6 +26,15 @@
     owner: "{{ reaper_user }}"
     group: "{{ reaper_group }}"
     mode: '0755'
+
+- name: Create Reaper persistence storage directory
+  file:
+    path: "{{ reaper_persistence_storage_dir }}"
+    state: directory
+    owner: "{{ reaper_user }}"
+    group: "{{ reaper_group }}"
+    mode: '0755'
+  when: reaper_storage_type == 'memory'
 
 - name: Download Cassandra Reaper
   get_url:

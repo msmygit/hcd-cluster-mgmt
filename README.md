@@ -84,7 +84,7 @@ vim inventory/group_vars/dc1.yml
 ### 4. Test Connectivity
 
 ```bash
-ansible -i inventory/hosts hcd_nodes -m ping --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible -i inventory/hosts hcd_nodes -m ping --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 > [!TIP]
@@ -93,7 +93,7 @@ ansible -i inventory/hosts hcd_nodes -m ping --key-file PRIVATE_KEY_FILE_PATH --
 ### 5. Install HCD Cluster
 
 ```bash
-ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ## 📚 Available Playbooks
@@ -102,31 +102,31 @@ ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --key-file PRI
 
 #### Install Complete Cluster
 ```bash
-ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 Performs full installation: system setup, Java, HCD installation, configuration, and rolling start.
 
 #### Configure Cluster
 ```bash
-ansible-playbook -i inventory/hosts playbooks/configure_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/configure_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 Updates configuration files and performs rolling restart.
 
 #### Start Cluster
 ```bash
-ansible-playbook -i inventory/hosts playbooks/start_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/start_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 Starts HCD services with rolling approach and health checks.
 
 #### Stop Cluster
 ```bash
-ansible-playbook -i inventory/hosts playbooks/stop_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/stop_cluster.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 Gracefully stops HCD services (drains nodes first).
 
 #### Rolling Restart
 ```bash
-ansible-playbook -i inventory/hosts playbooks/rolling_restart.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/rolling_restart.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 Performs rolling restart with health checks between nodes.
 
@@ -134,19 +134,19 @@ Performs rolling restart with health checks between nodes.
 
 #### Install MCAC (Metrics Collection)
 ```bash
-ansible-playbook -i inventory/hosts playbooks/install_monitoring.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_monitoring.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 Installs MCAC agent on all nodes with Prometheus endpoint.
 
 #### Install Reaper (Automated Repairs)
 ```bash
-ansible-playbook -i inventory/hosts playbooks/install_reaper.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_reaper.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 Installs Cassandra Reaper on the first node for repair management.
 
 #### Install Medusa (Backup/Restore)
 ```bash
-ansible-playbook -i inventory/hosts playbooks/install_medusa.yml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_medusa.yml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 Installs Medusa on all nodes for backup and restore operations.
 
@@ -241,26 +241,26 @@ cassandra_local_dc: "dc1"
 
 ```bash
 # Only install Java
-ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --tags java --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --tags java --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 
 # Only configure cassandra.yaml
-ansible-playbook -i inventory/hosts playbooks/configure_cluster.yml --tags cassandra_yaml --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/configure_cluster.yml --tags cassandra_yaml --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ### Limiting to Specific Hosts
 
 ```bash
 # Install on specific datacenter
-ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --limit dc1 --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --limit dc1 --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 
 # Install on specific node
-ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --limit 54.123.45.67 --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --limit 54.123.45.67 --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ### Dry Run
 
 ```bash
-ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --check --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible-playbook -i inventory/hosts playbooks/install_cluster.yml --check --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ## 📊 Monitoring
@@ -286,7 +286,7 @@ http://<first-node-ip>:8080/webui
 /opt/hcd/bin/nodetool status
 
 # Via Ansible
-ansible -i inventory/hosts hcd_nodes -a "/opt/hcd/bin/nodetool status" --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible -i inventory/hosts hcd_nodes -a "/opt/hcd/bin/nodetool status" --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ## 💾 Backup and Restore
@@ -315,31 +315,48 @@ sudo -u cassandra medusa restore --backup-name=<backup-name>
 ### Check Ansible Connectivity
 
 ```bash
-ansible -i inventory/hosts hcd_nodes -m ping --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible -i inventory/hosts hcd_nodes -m ping --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ### View HCD Logs
 
 ```bash
-ansible -i inventory/hosts hcd_nodes -a "tail -n 50 /var/log/cassandra/system.log" --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible -i inventory/hosts hcd_nodes -a "tail -n 50 /var/log/cassandra/system.log" --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ### Check Service Status
 
 ```bash
-ansible -i inventory/hosts hcd_nodes -a "systemctl status hcd" --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible -i inventory/hosts hcd_nodes -a "systemctl status hcd" --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ### Verify Configuration
 
 ```bash
-ansible -i inventory/hosts hcd_nodes -a "grep cluster_name /opt/hcd/resources/cassandra/conf/cassandra.yaml" --key-file PRIVATE_KEY_FILE_PATH --user USERNAME
+ansible -i inventory/hosts hcd_nodes -a "grep cluster_name /opt/hcd/resources/cassandra/conf/cassandra.yaml" --key-file PRIVATE_KEY_FILE_PATH --extra-vars='ansible_user=USERNAME'
 ```
 
 ### Check ansible inventory graph
 ```bash
 ansible-inventory --graph -i inventory
 ```
+
+### Check Reaper port issues
+
+<details>
+<summary>If reaper doesn't start. Expand/Collapse this</summary>
+
+```
+Caused by: java.net.BindException: Address already in use
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:565)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:344)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:301)
+	at org.eclipse.jetty.server.ServerConnector.openAcceptChannel(ServerConnector.java:339)
+	... 10 more
+```
+in that case, run `sudo lsof -i :8080` -> find the PID and check `ps -fp <PID>`. If that's a needed process, adjust reaper ports accordingly to run elsewhere.
+</details>
 
 ## 📖 Documentation
 

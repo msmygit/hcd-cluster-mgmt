@@ -15,6 +15,10 @@ blacklistTwcsTables: true
 
 jmxConnectionTimeoutInSeconds: {{ reaper_jmx_connection_timeout }}
 
+{% if reaper_storage_type == 'memory' %}
+persistenceStoragePath: {{ reaper_persistence_storage_dir }}
+{% endif %}
+
 {% if reaper_storage_type == 'cassandra' %}
 cassandra:
   clusterName: "{{ cluster_name }}"
@@ -85,8 +89,8 @@ jmxPorts:
 {% endfor %}
 
 jmxAuth:
-  username:
-  password:
+  username: {{ reaper_cassandra_username }}
+  password: {{ reaper_cassandra_password }}
 
 cryptograph:
   type: symmetric

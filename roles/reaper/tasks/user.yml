@@ -1,0 +1,19 @@
+---
+# Create reaper user and group
+
+- name: Create reaper group
+  group:
+    name: "{{ reaper_user }}"
+    #gid: "{{ reaper_group }}"
+    system: yes
+    state: present
+
+- name: Create reaper user
+  user:
+    name: "{{ reaper_user }}"
+    uid: "{{ reaper_uid }}"
+    group: "{{ reaper_group }}"
+    shell: /bin/false
+    system: yes
+    create_home: no
+    state: present

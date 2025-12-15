@@ -4,6 +4,9 @@
 - name: Configure cassandra.yaml
   include_tasks: cassandra_yaml.yml
 
+- name: Configure cassandra-env.sh
+  include_tasks: cassandra_env_sh.yml
+
 - name: Configure JVM options
   include_tasks: jvm_options.yml
 

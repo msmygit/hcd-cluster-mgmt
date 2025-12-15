@@ -1,6 +1,7 @@
 ---
 - name: Install Cassandra Reaper
-  hosts: hcd_nodes[0]  # Install on first node only
+  #hosts: hcd_nodes[0]  # Install on first node only
+  hosts: reaper_nodes
   become: yes
   gather_facts: yes
   roles:
@@ -10,7 +11,9 @@
   post_tasks:
     - name: Wait for Reaper to be ready
       uri:
-        url: "http://{{ private_ip }}:{{ reaper_port }}/ping"
+        #url: "http://{{ private_ip }}:{{ reaper_port }}/ping"
+        #url: "http://{{ inventory_hostname }}:{{ reaper_port }}/ping"
+        url: "http://{{ hostvars[inventory_hostname] }}:{{ reaper_port }}/ping"
         method: GET
         status_code: 200
       register: reaper_health

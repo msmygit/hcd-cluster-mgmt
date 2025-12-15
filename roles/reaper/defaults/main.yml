@@ -6,17 +6,23 @@ reaper_version: "4.0.1"
 reaper_download_url: "https://github.com/thelastpickle/cassandra-reaper/releases/download/{{ reaper_version }}/cassandra-reaper-{{ reaper_version }}-release.tar.gz"
 reaper_install_dir: "/opt/cassandra-reaper"
 reaper_config_dir: "{{ reaper_install_dir }}/resource"
+reaper_persistence_storage_dir: "{{ reaper_install_dir }}/storage"
 
 # Reaper user and group
-reaper_user: "reaper"
-reaper_group: "reaper"
+# reaper_user: "reaper"
+# reaper_group: "reaper"
+# reaper_uid: 1001
+reaper_user: "{{ ansible_user }}"
+reaper_group: "{{ ansible_user }}"
 
 # Reaper service settings
-reaper_port: 8080
-reaper_admin_port: 8081
+reaper_private_ip: "{{ hostvars[inventory_hostname]['private_ip'] }}"
+reaper_port: 9190
+reaper_admin_port: 9191
 
 # Reaper storage backend (cassandra or memory)
-reaper_storage_type: "cassandra"
+#reaper_storage_type: "cassandra"
+reaper_storage_type: "memory"
 
 # Cassandra connection settings for Reaper
 reaper_cassandra_contact_points:

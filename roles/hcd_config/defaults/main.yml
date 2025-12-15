@@ -5,6 +5,7 @@
 cassandra_conf_dir: "{{ hcd_install_dir }}/resources/cassandra/conf"
 cassandra_yaml_path: "{{ cassandra_conf_dir }}/cassandra.yaml"
 cassandra_rackdc_path: "{{ cassandra_conf_dir }}/cassandra-rackdc.properties"
+cassandra_env_sh_path: "{{ cassandra_conf_dir }}/cassandra-env.sh"
 logback_xml_path: "{{ cassandra_conf_dir }}/logback.xml"
 
 # JVM options files
