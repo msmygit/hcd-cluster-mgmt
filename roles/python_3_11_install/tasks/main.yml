@@ -6,10 +6,26 @@
 - name: Install Python 3.11 on Debian/Ubuntu
   when: ansible_os_family == "Debian"
   block:
-    - name: Add deadsnakes PPA (Ubuntu only)
+    # Ubuntu 24.04+ (noble, oracular, plucky, resolute...) has python3.11 in universe — no PPA needed.
+    # Older Ubuntu (focal, jammy) needs the deadsnakes PPA.
+    - name: Download deadsnakes PPA signing key via HTTPS (Ubuntu < 24.04)
+      get_url:
+        url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF23C5A6CF475977595C89F51BA6932366A755776"
+        dest: /tmp/deadsnakes-key.asc
+        mode: '0644'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Dearmor and install deadsnakes PPA signing key (Ubuntu < 24.04)
+      shell: gpg --dearmor < /tmp/deadsnakes-key.asc > /etc/apt/trusted.gpg.d/deadsnakes.gpg
+      args:
+        creates: /etc/apt/trusted.gpg.d/deadsnakes.gpg
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add deadsnakes PPA repository (Ubuntu < 24.04)
       apt_repository:
-        repo: ppa:deadsnakes/ppa
+        repo: "deb https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu {{ ansible_distribution_release }} main"
         state: present
+        update_cache: no
       when: ansible_distribution == "Ubuntu"
 
     - name: Update apt cache

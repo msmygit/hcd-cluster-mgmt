@@ -6,16 +6,31 @@
     name: "{{ java_package_redhat }}"
     state: present
 
-- name: Set Java {{ java_version }} as default using alternatives
+# Amazon Corretto's package post-install manages alternatives correctly.
+# Reset to auto to undo any prior manual override, then let the package decide.
+- name: Reset java alternatives to auto mode (Amazon Linux)
+  shell: alternatives --auto java
+  changed_when: false
+  failed_when: false
+  when: ansible_distribution == "Amazon"
+
+- name: Set Java {{ java_version }} as default using alternatives (RHEL/CentOS)
   alternatives:
     name: java
     path: "{{ java_home_redhat }}/bin/java"
     link: /usr/bin/java
     priority: 1
+  when: ansible_distribution != "Amazon"
+
+# Discover actual java home dynamically (handles arch suffix like .x86_64 on Amazon Linux)
+- name: Discover Java home path
+  shell: "dirname $(dirname $(readlink -f /usr/bin/java))"
+  register: java_home_discovered
+  changed_when: false
 
 - name: Set JAVA_HOME environment variable
   lineinfile:
     path: /etc/environment
     regexp: '^JAVA_HOME='
-    line: 'JAVA_HOME={{ java_home_redhat }}'
+    line: "JAVA_HOME={{ java_home_discovered.stdout }}"
     create: yes

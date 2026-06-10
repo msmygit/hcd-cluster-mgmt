@@ -28,7 +28,7 @@
     msg: >
       ERROR: Expected directory {{ hcd_install_dir }}/bin is missing.
       Likely cause: tar extraction did NOT strip the top-level directory correctly.
-      Check if tarball contains 'hcd-1.2.4/' folder or MacOS metadata '._*' files.
+      Check if tarball contains "{{ hcd_version }}/" folder or MacOS metadata '._*' files.
   when: not hcd_bin_stat.stat.isdir
 
 
@@ -46,7 +46,7 @@
     msg: >
       ERROR: Expected Cassandra config file '{{ cassandra_yaml_path }}' does not exist.
       This strongly indicates the directory structure is incorrect:
-      Current extracted structure might still be '{{ hcd_install_dir }}/hcd-1.2.4/...'
+      Current extracted structure might still be '{{ hcd_install_dir }}/{{ hcd_version }}/...'
       Instead of being flattened into '{{ hcd_install_dir }}/resources/...'.
   when: not cass_yaml_stat.stat.exists
 
@@ -55,7 +55,7 @@
 # Optional: Warn if subfolder like hcd-1.2.4/ exists
 # -------------------------------------------------------------
 
-- name: Detect incorrect nested directory (e.g. {{ hcd_install_dir }}/hcd-1.2.4)
+- name: Detect incorrect nested directory (e.g. {{ hcd_install_dir }}/{{ hcd_version }})
   stat:
     path: "{{ hcd_install_dir }}/hcd-*"
   register: hcd_nested_stat

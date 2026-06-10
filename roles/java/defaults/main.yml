@@ -3,6 +3,5 @@
 
 java_version: "11"
 java_package_debian: "openjdk-{{ java_version }}-jdk"
-#java_package_redhat: "java-{{ java_version }}-openjdk-devel"
-# For Amazon Linux, use:
-java_package_redhat: "java-openjdk{{ java_version }}"
+# Amazon Linux uses Corretto; RHEL/CentOS uses OpenJDK
+java_package_redhat: "{{ 'java-11-amazon-corretto' if ansible_distribution == 'Amazon' else 'java-11-openjdk-devel' }}"

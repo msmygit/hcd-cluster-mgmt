@@ -59,7 +59,8 @@
   lineinfile:
     path: "{{ cassandra_yaml_path }}"
     #regexp: '^\s+- seeds:\s*".*"'
-    regexp: '^\s{10}- seeds:\s*".*"'
+    #regexp: '^\s{10}- seeds:\s*".*"' hcd-1.2.x (4-spaced)
+    regexp: '^\s{6}- seeds:\s*".*"' # hcd-2.0.x (2-spaced)
     #line: '          - seeds: "{{ seed_nodes_string }}"'
     line: '          - seeds: "{{ seed_nodes_list }}"'
 
@@ -118,11 +119,19 @@
     regexp: '^#?\s*concurrent_compactors:\s*.*'
     line: "concurrent_compactors: {{ concurrent_compactors }}"
 
-- name: Set compaction_throughput_mb_per_sec
+- name: Set compaction_throughput_mb_per_sec [HCD 1.x.x]
   lineinfile:
     path: "{{ cassandra_yaml_path }}"
     regexp: '^#?compaction_throughput_mb_per_sec:\s*.*'
     line: "compaction_throughput_mb_per_sec: {{ compaction_throughput_mb_per_sec }}"
+  when: hcd_version is version('2.0.0', '<')
+
+- name: Set compaction_throughput [HCD 2.x.x]
+  lineinfile:
+    path: "{{ cassandra_yaml_path }}"
+    regexp: '^#?compaction_throughput:\s*.*'
+    line: "compaction_throughput: {{ compaction_throughput_mb_per_sec }}MiB/s"
+  when: hcd_version is version('2.0.0', '>=')
 
 - name: Uncomment metadata_directory
   lineinfile:

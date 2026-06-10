@@ -1,0 +1,21 @@
+---
+# Configure cassandra-env.sh using regex replacements
+# https://docs.datastax.com/en/hyper-converged-database/1.2/secure/configure-jmx-authentication.html
+
+- name: 'Set JMX Authentication - cassandra.jmx.remote.login.config'
+  lineinfile:
+    path: "{{ cassandra_env_sh_path }}"
+    regexp: '^#?JVM_OPTS="$JVM_OPTS -Dcassandra.jmx.remote.login.config=CassandraLogin"'
+    line: 'JVM_OPTS="$JVM_OPTS -Dcassandra.jmx.remote.login.config=CassandraLogin"'
+
+- name: 'Set JMX Authentication - java.security.auth.login.config'
+  lineinfile:
+    path: "{{ cassandra_env_sh_path }}"
+    regexp: '^#?JVM_OPTS="$JVM_OPTS -Djava.security.auth.login.config=$CASSANDRA_CONF/cassandra-jaas.config"'
+    line: 'JVM_OPTS="$JVM_OPTS -Djava.security.auth.login.config=$CASSANDRA_CONF/cassandra-jaas.config"'
+
+- name: 'Set JMX Authorizer - cassandra.jmx.authorizer'
+  lineinfile:
+    path: "{{ cassandra_env_sh_path }}"
+    regexp: '^#?JVM_OPTS="$JVM_OPTS -Dcassandra.jmx.authorizer=org.apache.cassandra.auth.jmx.AuthorizationProxy"'
+    line: 'JVM_OPTS="$JVM_OPTS -Dcassandra.jmx.authorizer=org.apache.cassandra.auth.jmx.AuthorizationProxy"'

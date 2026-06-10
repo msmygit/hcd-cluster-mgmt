@@ -2,15 +2,15 @@
 # Global variables for all hosts
 
 # Ansible connection settings
-ansible_user: ubuntu
+# ansible_user is set per-group (dc1.yml=ubuntu, dc2.yml=ec2-user, reaper_nodes.yml=ubuntu)
 ansible_become: yes
 ansible_python_interpreter: /usr/bin/python3
 
 # HCD version and paths
-hcd_version: "1.2.4"
+hcd_version: "2.0.6"
 # on macOS, use 'COPYFILE_DISABLE=1 tar -czvf hcd-1.2.4.tar.gz hcd-1.2.4/' to create the tarball, if required to avoid creating AppleDouble metadata files
 # https://en.wikipedia.org/wiki/AppleSingle_and_AppleDouble_formats
-hcd_tarball_name: "hcd-{{ hcd_version }}.tar.gz"
+hcd_tarball_name: "hcd-{{ hcd_version }}-bin.tar.gz"
 hcd_tarball_path: "{{ playbook_dir }}/../{{ hcd_tarball_name }}"
 hcd_install_dir: "/opt/hcd"
 
@@ -25,7 +25,8 @@ cassandra_group: "cassandra"
 # Java settings
 java_version: "11"
 java_home_debian: "/usr/lib/jvm/java-11-openjdk-amd64"
-java_home_redhat: "/usr/lib/jvm/java-11-openjdk"
+# Amazon Corretto installs to a different path than OpenJDK on RHEL/CentOS
+java_home_redhat: "{{ '/usr/lib/jvm/java-11-amazon-corretto' if ansible_distribution == 'Amazon' else '/usr/lib/jvm/java-11-openjdk' }}"
 
 # System settings
 disable_swap: true
