@@ -38,7 +38,7 @@ Each inventory file follows this format:
 
 ```ini
 [hcd_nodes]
-public_ip private_ip=<internal_ip> rack=<rack_name> dc=<datacenter_name> seed=<true|false>
+public_ip private_ip=<internal_ip> rack=<rack_name> dc=<datacenter_name> seed=<true|false> ansible_user=<user>
 
 [dc_name]
 public_ip1
@@ -52,6 +52,7 @@ public_ip2
 - **rack**: Rack identifier for rack-aware replication
 - **dc**: Datacenter identifier
 - **seed**: Whether this node is a seed node (true/false)
+- **ansible_user**: The username to use for SSH connections
 
 ### Datacenter Groups
 

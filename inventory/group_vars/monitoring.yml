@@ -7,14 +7,14 @@ mcac_prometheus_port: 9103
 
 # Reaper configuration
 reaper_enabled: true
-reaper_version: "4.0.1"
+reaper_version: "4.2.4"
 reaper_install_type: "dedicated"  # or "colocated"
 reaper_ui_port: 8080
-reaper_storage_type: "cassandra"
+reaper_storage_type: "memory"
 
 # Medusa configuration
 medusa_enabled: true
-medusa_version: "0.21.0"
-medusa_storage_provider: "s3"  # s3, gcs, azure, local
+medusa_version: "0.29.0"
+medusa_storage_provider: "local"  # s3, gcs, azure, local
 medusa_bucket_name: "hcd-backups"
 medusa_backup_retention_days: 30

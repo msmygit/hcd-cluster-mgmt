@@ -4,18 +4,29 @@
 - name: Include OS-specific tasks
   include_tasks: "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: Install Python pip (if not present)
-  package:
-    name: python3-pip
-    state: present
-  when: medusa_install_method == 'pip'
+- name: Create Medusa venv parent directory
+  file:
+    path: "{{ medusa_venv | dirname }}"
+    state: directory
+    mode: '0755'
 
-- name: Install Medusa via pip
+- name: Create dedicated Python 3.11 venv for Medusa
+  shell: "python3.11 -m venv {{ medusa_venv }}"
+  args:
+    creates: "{{ medusa_venv }}/bin/activate"
+
+- name: Install Medusa {{ medusa_version }} into dedicated venv
   pip:
-    name: "{{ medusa_python_packages }}"
+    name: "cassandra-medusa=={{ medusa_version }}"
     state: present
-    executable: pip3
-  when: medusa_install_method == 'pip'
+    virtualenv: "{{ medusa_venv }}"
+    virtualenv_python: python3.11
+
+- name: Symlink medusa binary to /usr/local/bin for global access
+  file:
+    src: "{{ medusa_bin }}"
+    dest: /usr/local/bin/medusa
+    state: link
 
 - name: Create Medusa configuration directory
   file:
@@ -25,7 +36,7 @@
     group: "{{ medusa_group }}"
     mode: '0755'
 
-- name: Create local backup directory (if using local storage)
+- name: Create local backup directory
   file:
     path: "{{ medusa_local_backup_dir }}"
     state: directory
@@ -42,19 +53,19 @@
     group: "{{ medusa_group }}"
     mode: '0600'
 
-- name: Create Medusa credentials file for S3 (if needed)
+- name: Create S3 credentials file
   template:
     src: s3_credentials.j2
     dest: "{{ medusa_config_dir }}/.s3cfg"
     owner: "{{ medusa_user }}"
     group: "{{ medusa_group }}"
     mode: '0600'
-  when: 
+  when:
     - medusa_storage_provider == 's3'
     - medusa_s3_access_key_id != ''
   no_log: true
 
-- name: Create Medusa GCS credentials file (if needed)
+- name: Create GCS credentials file
   copy:
     src: "{{ medusa_gcs_credentials_file }}"
     dest: "{{ medusa_config_dir }}/gcs_credentials.json"
@@ -67,7 +78,7 @@
   no_log: true
 
 - name: Verify Medusa installation
-  command: medusa --version
+  command: "{{ medusa_bin }} --version"
   register: medusa_version_output
   changed_when: false
 

@@ -13,6 +13,8 @@
   serial: 1  # One node at a time for restart
   become: yes
   gather_facts: no
+  vars_files:
+    - ../roles/mcac/defaults/main.yml
   tasks:
     - name: Drain node before restart
       shell: "{{ hcd_install_dir }}/bin/nodetool drain"

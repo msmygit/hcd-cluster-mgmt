@@ -7,8 +7,7 @@ After=network.target
 Type=simple
 User={{ reaper_user }}
 Group={{ reaper_group }}
-#Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
-Environment="JAVA_HOME=/usr/bin/java"
+Environment="JAVA_HOME={{ reaper_java_home.stdout }}"
 Environment="REAPER_ENCRYPTION_KEY=changeme"
 WorkingDirectory={{ reaper_install_dir }}
 ExecStart=/usr/bin/java -jar {{ reaper_install_dir }}/server/target/cassandra-reaper-{{ reaper_version }}.jar server {{ reaper_config_dir }}/cassandra-reaper.yaml
@@ -23,7 +22,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths={{ reaper_log_dir }}
+ReadWritePaths={{ reaper_log_dir }} {{ reaper_persistence_storage_dir }}
 
 [Install]
 WantedBy=multi-user.target

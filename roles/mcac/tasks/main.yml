@@ -34,10 +34,10 @@
     group: cassandra
     mode: '0755'
 
-- name: Configure MCAC metrics-collector.yaml
+- name: Configure MCAC metric-collector.yaml
   template:
-    src: metrics-collector.yaml.j2
-    dest: "{{ mcac_config_dir }}/metrics-collector.yaml"
+    src: metric-collector.yaml.j2
+    dest: "{{ mcac_config_dir }}/metric-collector.yaml"
     owner: cassandra
     group: cassandra
     mode: '0644'
@@ -49,7 +49,8 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK - MCAC"
     block: |
       # MCAC (Metric Collector for Apache Cassandra)
-      JVM_OPTS="$JVM_OPTS -javaagent:{{ mcac_agent_jar }}=config={{ mcac_config_dir }}/metrics-collector.yaml"
+      MCAC_ROOT={{ mcac_install_dir }}
+      JVM_OPTS="$JVM_OPTS -javaagent:${MCAC_ROOT}/lib/{{ mcac_agent_jar | basename }}"
     insertafter: EOF
   notify: Restart HCD
 

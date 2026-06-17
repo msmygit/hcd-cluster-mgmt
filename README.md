@@ -28,8 +28,8 @@ Comprehensive Ansible automation for deploying and managing [Hyper-Converged Dat
 - Network connectivity between all nodes
 
 ### HCD Tarball
-- HCD 1.2.4 tarball should be placed in `./hcd-1.2.4/` directory
-- Download from DataStax or use your licensed version
+- HCD tarball `hcd-2.0.6-bin.tar.gz` file should be placed in the root (`./`) directory
+- Download from DataStax/IBM or use your licensed version
 
 ## 🚀 Quick Start
 
@@ -40,7 +40,7 @@ git clone <repository-url>
 cd hcd-cluster-mgmt
 
 # Ensure HCD tarball is in place
-ls hcd-1.2.4/
+ls hcd-2.0.6/
 ```
 
 ### 2. Configure Inventory
@@ -175,7 +175,7 @@ hcd-cluster-mgmt/
 │   ├── reaper/                # Reaper installation
 │   └── medusa/                # Medusa installation
 ├── playbooks/                 # Ansible playbooks
-└── hcd-1.2.4/                # HCD tarball (not in git)
+└── hcd-2.0.6/                # HCD tarball (not in git)
 ```
 
 ### Network Configuration
@@ -412,13 +412,13 @@ For issues and questions:
 
 To upgrade HCD version:
 
-1. Download new HCD tarball to `./hcd-1.2.x/`
+1. Download new HCD tarball to `./hcd-2.x/`
 2. Update `hcd_version` in `inventory/group_vars/hcd_nodes.yml`
 3. Run rolling restart playbook
 4. Verify cluster health
 
 ---
 
-**Version**: 1.0.0  
-**HCD Version**: 1.2.4  
+**Version**: 1.0.1
+**HCD Version**: 2.0.6
 **Ansible Version**: 2.20.2+

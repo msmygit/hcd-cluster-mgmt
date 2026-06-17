@@ -1,9 +1,10 @@
 ---
 # Cassandra Medusa (Backup/Restore) default variables
 
-# Medusa installation method (pip or package)
-medusa_install_method: "pip"
-medusa_version: "0.26.0"
+# Medusa version and venv
+medusa_version: "0.29.0"
+medusa_venv: "/opt/medusa/venv"
+medusa_bin: "{{ medusa_venv }}/bin/medusa"
 
 # Medusa user and group
 medusa_user: "cassandra"
@@ -20,7 +21,7 @@ medusa_cassandra_data_dir: "{{ cassandra_data_dir }}"
 medusa_cassandra_is_ccm: 0
 
 # Storage backend (local, s3, gcs, azure)
-medusa_storage_provider: "s3"
+medusa_storage_provider: "local"
 medusa_bucket_name: "cassandra-backups"
 medusa_base_path: "{{ hcd_cluster_name }}"
 

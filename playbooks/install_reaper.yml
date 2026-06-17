@@ -5,15 +5,15 @@
   become: yes
   gather_facts: yes
   roles:
+    - role: java
+      tags: ['java', 'reaper']
     - role: reaper
       tags: ['reaper', 'repairs']
 
   post_tasks:
     - name: Wait for Reaper to be ready
       uri:
-        #url: "http://{{ private_ip }}:{{ reaper_port }}/ping"
-        #url: "http://{{ inventory_hostname }}:{{ reaper_port }}/ping"
-        url: "http://{{ hostvars[inventory_hostname] }}:{{ reaper_port }}/ping"
+        url: "http://{{ inventory_hostname }}:{{ reaper_port }}/ping"
         method: GET
         status_code: 200
       register: reaper_health

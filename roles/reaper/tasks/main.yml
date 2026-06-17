@@ -53,6 +53,11 @@
     extra_opts: [--strip-components=1]
   when: reaper_download.changed
 
+- name: Discover Java home path for Reaper service
+  shell: "dirname $(dirname $(readlink -f /usr/bin/java))"
+  register: reaper_java_home
+  changed_when: false
+
 - name: Configure Reaper cassandra-reaper.yaml
   template:
     src: cassandra-reaper.yaml.j2
@@ -71,10 +76,11 @@
     - Reload systemd
     - Restart Reaper
 
-- name: Enable Reaper service
+- name: Enable and start Reaper service
   systemd:
     name: cassandra-reaper
     enabled: yes
+    state: started
     daemon_reload: yes
 
 - name: Clean up downloaded tarball

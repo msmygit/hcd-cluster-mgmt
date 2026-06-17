@@ -13,7 +13,10 @@ check_running = nodetool version
 [storage]
 ; Storage backend configuration
 storage_provider = {{ medusa_storage_provider }}
-bucket_name = {{ medusa_bucket_name }}
+; For local storage, bucket_name is the backup root directory path.
+; For cloud storage, bucket_name is the bucket name.
+bucket_name = {% if medusa_storage_provider == 'local' %}{{ medusa_local_backup_dir }}{% else %}{{ medusa_bucket_name }}{% endif %}
+
 base_path = {{ medusa_base_path }}
 max_backup_age = {{ medusa_backup_grace_period_in_days }}
 max_backup_count = 0
@@ -44,12 +47,6 @@ project_id = {{ medusa_gcs_project_id }}
 ; Azure Blob Storage configuration
 storage_account = {{ medusa_azure_storage_account }}
 storage_key = {{ medusa_azure_storage_key }}
-{% endif %}
-
-{% if medusa_storage_provider == 'local' %}
-[local]
-; Local storage configuration
-base_path = {{ medusa_local_backup_dir }}
 {% endif %}
 
 [monitoring]

@@ -1,7 +1,7 @@
 # HCD Cluster Inventory
 # Multi-datacenter, multi-node support
 #
-# Format: public_ip private_ip=<private_ip> rack=<rack> dc=<dc> seed=<true|false>
+# Format: public_ip private_ip=<private_ip> rack=<rack> dc=<dc_name> seed=<true|false> ansible_user=<user>
 #
 # Host Variables:
 #   inventory_hostname (first parameter): Public IP for SSH and broadcast_address
@@ -9,16 +9,27 @@
 #   rack: Rack assignment for topology awareness
 #   dc: Datacenter assignment
 #   seed: Boolean (true/false) to identify seed nodes
+#   ansible_user: SSH user for the node
 #
 # Note: Seed nodes are auto-inferred from hosts where seed=true
 
 [hcd_nodes:children]
 dc1
-#dc2
+dc2
 
 [dc1]
 # Example nodes for datacenter 1
-136.116.216.148 private_ip=10.1.0.2 rack=rack1 dc=dc1 seed=true
+# Below are data labs aws useast1, use --extra-vars='ansible_user=ubuntu' in ansible commands
+3.15.21.27 private_ip=172.31.1.8 rack=rack1 dc=dc1 seed=true ansible_user=ubuntu
+18.188.210.5 private_ip=172.31.1.6 rack=rack2 dc=dc1 seed=true ansible_user=ubuntu
+18.117.168.68 private_ip=172.31.1.10 rack=rack3 dc=dc1 seed=false ansible_user=ubuntu
+
+# Below is GCP VM for hcd-cluster-mgmt repo
+# 136.116.216.148 private_ip=10.1.0.2 rack=rack1 dc=dc1 seed=true
+# Below 3 AWS VMs are for GE Aerospace DSE 6.9 -> CDC -> DSE 6.9 POC
+#3.144.159.254 private_ip=172.31.26.196 rack=rack1 dc=dc1 seed=true
+#18.221.3.186 private_ip=172.31.28.18 rack=rack2 dc=dc1 seed=true
+#3.143.215.221 private_ip=172.31.20.72 rack=rack3 dc=dc1 seed=false
 # 54.123.45.67 private_ip=10.0.1.10 rack=rack1 dc=dc1 seed=true
 # 54.123.45.68 private_ip=10.0.1.11 rack=rack1 dc=dc1 seed=false
 # 54.123.45.69 private_ip=10.0.1.12 rack=rack2 dc=dc1 seed=false
@@ -26,13 +37,19 @@ dc1
 [dc2]
 # Example nodes for datacenter 2
 # 54.234.56.78 private_ip=10.0.2.10 rack=rack1 dc=dc2 seed=true
-# 54.234.56.79 private_ip=10.0.2.11 rack=rack1 dc=dc2 seed=false
+# 54.234.56.79 private_ip=10.0.2.11 rack=rack1 dc=dc2 seed=true
 # 54.234.56.80 private_ip=10.0.2.12 rack=rack2 dc=dc2 seed=false
+# , use --extra-vars='ansible_user=ec2-user' in ansible commands
+3.135.190.152 private_ip=172.31.1.12 rack=rack1 dc=dc2 seed=true ansible_user=ec2-user 
+13.59.98.106 private_ip=172.31.1.14 rack=rack2 dc=dc2 seed=true ansible_user=ec2-user 
+18.216.123.17 private_ip=172.31.1.5 rack=rack3 dc=dc2 seed=false ansible_user=ec2-user
 
 [reaper_nodes]
 # Dedicated Reaper nodes (optional - can be co-located)
 # 10.0.3.10
+18.224.67.100 ansible_user=ubuntu
 
 [monitoring_nodes]
 # Monitoring infrastructure nodes
 # 10.0.4.10
+18.224.67.100 ansible_user=ubuntu
